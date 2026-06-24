@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+    <title>Thống kê & Tổng quan</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <h2 class="mb-4">Dashboard Overview</h2>
+
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <h3 class="card-text">$12,450.00</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">New Orders</h5>
+                    <h3 class="card-text">45</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Products</h5>
+                    <h3 class="card-text">120</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h3 class="card-text">850</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header fw-bold bg-white">
+            <i class="fa-solid fa-chart-line text-primary me-1"></i> Monthly Order Statistics
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Biểu đồ thống kê sẽ được tích hợp tại đây để phục vụ report cuối tháng...</p>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        console.log("Dashboard loaded successfully!");
+    </script>
+</th:block>
+
+</body>
+</html>
