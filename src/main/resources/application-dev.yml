@@ -26,6 +26,9 @@ management:
   endpoint:
     health:
       show-details: when-authorized # Show health details only for authenticated admins
+app:
+  security:
+    remember-me-key: ${REMEMBER_ME_KEY:${random.uuid}}
 jwt:
   secret: ${JWT_SECRET}  #  # inject via env; do not hard-code defaults in repo (>= 32 chars)
   expiration: 3600000 # 1 hour
