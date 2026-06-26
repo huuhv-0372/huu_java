@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>500 - Lỗi hệ thống</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-light">
+<div class="container vh-100 d-flex justify-content-center align-items-center">
+    <div class="col-md-7">
+        <div class="card shadow-lg border-0" style="border-radius: 15px;">
+            <div class="card-body p-5 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-cogs text-danger" style="font-size: 80px;"></i>
+                </div>
+
+                <h1 class="display-5 fw-bold text-dark">500 - Server Error</h1>
+                <h4 class="text-danger mb-4">Đã xảy ra lỗi hệ thống!</h4>
+
+                <p class="text-muted mb-4">
+                    Máy chủ đang gặp sự cố và không thể xử lý yêu cầu của bạn lúc này. Đội ngũ kỹ thuật đã được thông báo. Vui lòng thử lại sau ít phút.
+                </p>
+
+                <div class="alert alert-secondary text-start mb-4" th:if="${message != null}">
+                    <small><strong>Mã lỗi:</strong> <span th:text="${message}">Exception detail...</span></small>
+                </div>
+
+                <div class="d-grid gap-2 d-md-block">
+                    <button onclick="history.back()" class="btn btn-outline-secondary px-4 me-md-2">
+                        <i class="fas fa-arrow-left"></i> Thử lại
+                    </button>
+                    <a th:href="@{/}" class="btn btn-primary px-4">
+                        <i class="fas fa-home"></i> Về trang chủ
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-center text-muted py-3 bg-white border-0">
+                Nếu lỗi vẫn tiếp diễn, vui lòng liên hệ bộ phận CSKH.
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

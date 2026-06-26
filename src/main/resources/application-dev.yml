@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    url: ${DB_FOODSNDRINKS_URL:jdbc:mysql://localhost:3306/foodsndrinks?useSSL=false&serverTimezone=UTC}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: update # Automatically create/update tables when code changes
+#    show-sql: true # Print SQL queries to console for easy debugging
+#    properties:
+#      hibernate:
+#        format_sql: true
+
+# Customize logging for Dev environment (console output)
+logging:
+  level:
+    root: INFO
+    com.huuhv.foodsndrinks: DEBUG # Show detailed logs for application code
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,caches # Expose necessary endpoints
+  endpoint:
+    health:
+      show-details: when-authorized # Show health details only for authenticated admins
+jwt:
+  secret: ${JWT_SECRET}  #  # inject via env; do not hard-code defaults in repo (>= 32 chars)
+  expiration: 3600000 # 1 hour
+
+# Bật tính năng Swagger UI
+springdoc:
+  swagger-ui:
+    enabled: true
+    # Thay đổi đường dẫn mặc định (thay vì /swagger-ui.html)
+    path: /api-docs/swagger
+  # Đường dẫn chứa file JSON cấu hình
+  api-docs:
+    path: /api/v1/api-docs
+  # Gom nhóm các API theo package để Document gọn gàng hơn
+  packages-to-scan: com.huuhv.foodsndrinks.controller.api

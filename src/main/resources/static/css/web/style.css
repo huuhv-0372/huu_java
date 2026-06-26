@@ -1,0 +1,33 @@
+/* Custom CSS for User Storefront */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #fcfcfc;
+}
+.navbar-user {
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.cart-badge {
+    position: absolute;
+    top: 0;
+    right: -5px;
+    font-size: 0.65rem;
+}
+main {
+    flex: 1; /* Đẩy footer xuống dưới cùng */
+}
+.footer {
+    background-color: #212529;
+    color: #adb5bd;
+}
+.hover-white:hover {
+    color: #ffffff !important;
+    transition: 0.3s;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    transition: all 0.3s ease;
+}
