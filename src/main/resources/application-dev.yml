@@ -4,13 +4,13 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-#  jpa:
-#    hibernate:
-#      ddl-auto: update # Automatically create/update tables when code changes
-#    show-sql: true # Print SQL queries to console for easy debugging
-#    properties:
-#      hibernate:
-#        format_sql: true
+  jpa:
+    hibernate:
+      ddl-auto: update # Automatically create/update tables when code changes
+    show-sql: true # Print SQL queries to console for easy debugging
+    properties:
+      hibernate:
+        format_sql: true
 
 # Customize logging for Dev environment (console output)
 logging:
