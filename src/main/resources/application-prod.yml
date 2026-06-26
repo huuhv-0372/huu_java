@@ -1,0 +1,36 @@
+server:
+  port: ${SERVER_PORT:8080} # Allow override; avoid privileged port binding by default
+
+spring:
+  datasource:
+    # This URL points to a cloud database (e.g., AWS RDS)
+    url: ${DB_FOODSNDRINKS_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+# Customize logging for Prod environment (write to file for storage)
+logging:
+  level:
+    root: WARN # Only print warnings and errors, suppress INFO logs
+    com.huuhv.foodsndrinks: INFO
+  file:
+    name: logs/foodsndrinks.log # Write logs to a file
+jwt:
+  secret: ${JWT_SECRET}  # >= 32 chars
+  expiration: 3600000 # 1 hour
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health # Only expose health in prod (no metrics/info publicly)
+  endpoint:
+    health:
+      show-details: when-authorized # Details visible only to authenticated admins
+
+# Disable Swagger UI entirely in production
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
