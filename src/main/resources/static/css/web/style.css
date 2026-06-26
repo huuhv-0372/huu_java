@@ -31,3 +31,14 @@ main {
     box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     transition: all 0.3s ease;
 }
+
+/*-- login page */
+.btn-google { background-color: #db4437; color: white; }
+.btn-google:hover { background-color: #c23321; color: white; }
+.btn-facebook { background-color: #4267B2; color: white; }
+.btn-facebook:hover { background-color: #3b5998; color: white; }
+.btn-twitter { background-color: #1DA1F2; color: white; }
+.btn-twitter:hover { background-color: #1a91da; color: white; }
+.divider:after, .divider:before {
+    content: ""; flex: 1; height: 1px; background: #eee;
+}
