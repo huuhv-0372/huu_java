@@ -1,6 +1,10 @@
 package com.huuhv.foodsndrinks.config;
 
+import com.huuhv.foodsndrinks.enums.Role;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -8,13 +12,23 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+
+import java.util.Collection;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity   // enable @PreAuthorize / @Secured on individual methods
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    @Value("${app.security.remember-me-key}")
+    private String rememberMeKey;
 
     // -------------------------------------------------------
     // Chain 1: Actuator endpoints — ROLE_ADMIN only
@@ -62,6 +76,42 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+
+            // Honor any saved request (e.g. user was trying to access /profile before being redirected to /login)
+            var requestCache = new HttpSessionRequestCache();
+            var savedRequest = requestCache.getRequest(request, response);
+            if (savedRequest != null) {
+                new org.springframework.security.web.DefaultRedirectStrategy()
+                        .sendRedirect(request, response, savedRequest.getRedirectUrl());
+                return;
+            }
+
+            // Lấy danh sách các quyền (Roles) của User hiện tại
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+            String redirectUrl = "/"; // Mặc định nếu không rơi vào các case dưới
+
+            for (GrantedAuthority grantedAuthority : authorities) {
+                String authorityName = grantedAuthority.getAuthority();
+
+                if (authorityName.equals(Role.ROLE_ADMIN.name())) {
+                    redirectUrl = "/admin"; // Admin thì vào trang quản trị
+                    break;
+                } else if (authorityName.equals(Role.ROLE_USER.name())) {
+                    redirectUrl = "/"; // User thường thì về trang chủ cửa hàng
+                    break;
+                }
+            }
+
+            // Thực hiện redirect thực tế
+            new DefaultRedirectStrategy()
+                    .sendRedirect(request, response, request.getContextPath() + redirectUrl);
+        };
+    }
+
     // -------------------------------------------------------
     // Chain 3: Web / Thymeleaf MVC — session + form login
     // -------------------------------------------------------
@@ -75,13 +125,21 @@ public class SecurityConfig {
                         // Public pages
                         .requestMatchers("/", "/menu", "/login", "/register", "/error").permitAll()
                         // Admin dashboard — ROLE_ADMIN only
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+
+                        .requestMatchers("/profile", "/cart/**", "/orders/**").hasAnyRole("USER", "ADMIN")
                         // Anything else requires the user to be logged in
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+
+                        // THAY THẾ .defaultSuccessUrl bằng .successHandler vừa tạo ở trên
+                        .successHandler(customAuthenticationSuccessHandler())
+
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
@@ -89,8 +147,13 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "remember-me")
                         .permitAll()
+                )
+                .rememberMe(remember -> remember
+                        .key(rememberMeKey)
+                        .tokenValiditySeconds(7 * 24 * 60 * 60)
+                        .rememberMeParameter("remember-me")
                 )
                 .exceptionHandling(ex -> ex
                         // Redirect to a friendly 403 page instead of the default whitelabel

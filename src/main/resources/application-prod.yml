@@ -15,6 +15,9 @@ logging:
     com.huuhv.foodsndrinks: INFO
   file:
     name: logs/foodsndrinks.log # Write logs to a file
+app:
+  security:
+    remember-me-key: ${REMEMBER_ME_KEY}
 jwt:
   secret: ${JWT_SECRET}  # >= 32 chars
   expiration: 3600000 # 1 hour
