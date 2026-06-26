@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: foodsndrinks
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev} # Change to 'prod' when deploying to a real server
+
+server:
+  port: 8080 # Default port
