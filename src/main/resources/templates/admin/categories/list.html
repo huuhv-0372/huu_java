@@ -29,6 +29,7 @@
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form th:action="@{/admin/categories}" method="get" class="row g-3 align-items-end">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="col-md-4">
                     <label class="form-label fw-medium">Tên danh mục</label>
                     <input type="text" name="name" class="form-control" placeholder="Tìm theo tên..."
@@ -121,8 +122,6 @@
                         <form th:action="@{/admin/categories/{id}/delete(id=${cat.id})}"
                               method="post" class="d-inline"
                               onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này? Các sản phẩm thuộc danh mục sẽ bị ảnh hưởng.');">
-                            <input th:if="${_csrf != null}" type="hidden"
-                                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
                                 <i class="fa-solid fa-trash"></i>
                             </button>

@@ -1,10 +1,11 @@
-package com.huuhv.foodsndrinks.security;
+package com.huuhv.foodsndrinks.service;
 
 import com.huuhv.foodsndrinks.dto.request.CategoryReqDto;
 import com.huuhv.foodsndrinks.dto.response.CategoryResDto;
 import com.huuhv.foodsndrinks.entity.Category;
 import com.huuhv.foodsndrinks.enums.CategoryType;
 import com.huuhv.foodsndrinks.repository.CategoryRepository;
+import com.huuhv.foodsndrinks.utils.SlugUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -15,10 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -106,19 +105,6 @@ public class CategoryService {
         }
     }
 
-    // Convert category name to slug
-    private String convertToSlug(String input) {
-        if (input == null || input.isEmpty()) return "";
-        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        String slug = pattern.matcher(normalized).replaceAll("");
-        return slug.toLowerCase(Locale.ROOT)
-                .replace("đ", "d")
-                .replaceAll("[^a-z0-9\\s-]", "") // Xóa ký tự đặc biệt
-                .replaceAll("\\s+", "-")         // Thay khoảng trắng bằng gạch ngang
-                .replaceAll("-+", "-");          // Xóa gạch ngang thừa
-    }
-
     private String normalizeName(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Tên danh mục không được để trống!");
@@ -131,7 +117,7 @@ public class CategoryService {
     }
 
     private String generateUniqueSlug(String name, Long currentCategoryId) {
-        String baseSlug = convertToSlug(name);
+        String baseSlug = SlugUtils.toSlug(name);
         if (baseSlug.isBlank()) {
             throw new IllegalArgumentException("Tên danh mục không hợp lệ để tạo slug!");
         }

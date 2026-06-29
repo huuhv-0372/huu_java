@@ -16,7 +16,7 @@ public class CategoryReqDto {
     @NotBlank(message = "Tên danh mục không được để trống.")
     private String name;
 
-    @NotNull(message = "Vui long chọn loại danh mục")
+    @NotNull(message = "Vui lòng chọn loại danh mục")
     private CategoryType type;
 
     private String description;

@@ -2,7 +2,7 @@ package com.huuhv.foodsndrinks.controller.admin;
 
 import com.huuhv.foodsndrinks.dto.request.CategoryReqDto;
 import com.huuhv.foodsndrinks.dto.response.CategoryResDto;
-import com.huuhv.foodsndrinks.security.CategoryService;
+import com.huuhv.foodsndrinks.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

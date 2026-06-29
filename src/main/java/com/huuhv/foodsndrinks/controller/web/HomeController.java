@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class HomeController {
     @GetMapping()
     public String home() {
-        return "web/index"; // Return the name of the Thymeleaf template (list.html)
+        return "web/index"; // Return the name of the Thymeleaf template (index.html)
     }
 }
