@@ -53,6 +53,9 @@ public class FileStorageService {
 
         try {
             Path destination = rootLocation.resolve(subFolder).normalize();
+            if (!destination.startsWith(rootLocation)) {
+                throw new IllegalArgumentException("Thư mục upload không hợp lệ!");
+            }
             Files.createDirectories(destination);
             file.transferTo(destination.resolve(fileName));
         } catch (IOException e) {

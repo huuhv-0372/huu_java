@@ -159,15 +159,20 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(Long id) {
+        Product product = findById(id);
+        List<String> imageUrls = productImageRepository.findByProductIdOrderBySortOrderAsc(id)
+                .stream()
+                .map(ProductImage::getImageUrl)
+                .toList();
         try {
-            Product product = findById(id);
-            // Delete all image files from filesystem
-            productImageRepository.findByProductIdOrderBySortOrderAsc(id)
-                    .forEach(img -> fileStorageService.delete(img.getImageUrl()));
             productRepository.delete(product);
+            productRepository.flush();
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Không thể xóa sản phẩm này vì đang được tham chiếu!");
         }
+
+        // Delete images from storage
+        imageUrls.forEach(fileStorageService::delete);
     }
 
     // -------------------------------------------------------

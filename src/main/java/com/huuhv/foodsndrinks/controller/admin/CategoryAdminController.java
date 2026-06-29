@@ -28,7 +28,7 @@ public class CategoryAdminController {
                                  @RequestParam(defaultValue = "10") int size,
                                  Model model) {
         int safePage = Math.max(page, 0);
-        int safePageSize = Math.max(size, 10);
+        int safePageSize = Math.clamp(size, 1, 100);
         Page<CategoryResDto> categoryPage = categoryService.searchCategories(name, type, description, safePage, safePageSize);
         model.addAttribute("categories", categoryPage.getContent());
         model.addAttribute("currentPage", categoryPage.getNumber());

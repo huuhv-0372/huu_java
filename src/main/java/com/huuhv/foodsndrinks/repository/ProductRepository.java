@@ -18,7 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsBySlugAndIdNot(String slug, Long id);
 
     @Query(value = """
-            SELECT p FROM Product p LEFT JOIN p.category c
+            SELECT p FROM Product p LEFT JOIN FETCH p.category c
             WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
               AND (:categoryId IS NULL OR (p.category IS NOT NULL AND c.id = :categoryId))
               AND (:type IS NULL OR p.type = :type)

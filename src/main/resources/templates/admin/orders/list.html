@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+    <title>Quản lý Đơn Hàng</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">
+            <i class="fa-solid fa-cart-shopping text-primary me-2"></i>Quản lý Đơn Hàng
+        </h2>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Quick-status tabs -->
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <a th:href="@{/admin/orders}" class="btn btn-sm"
+           th:classappend="${searchStatus == null} ? 'btn-dark' : 'btn-outline-dark'">
+            Tất cả
+        </a>
+        <a th:each="s : ${orderStatuses}"
+           th:href="@{/admin/orders(status=${s.name()})}"
+           class="btn btn-sm"
+           th:classappend="${searchStatus == s.name()} ? ${s.badgeClass} : 'btn-outline-secondary'">
+            <span th:text="${s.label}"></span>
+        </a>
+    </div>
+
+    <!-- Search form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/orders}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label fw-medium">Mã đơn #</label>
+                    <input type="number" name="orderId" class="form-control" placeholder="VD: 42"
+                           th:value="${searchOrderId}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-medium">Khách hàng (username / tên / email)</label>
+                    <input type="text" name="keyword" class="form-control" placeholder="Tìm kiếm..."
+                           th:value="${searchKeyword}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-medium">Trạng thái</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="s : ${orderStatuses}"
+                                th:value="${s.name()}"
+                                th:text="${s.label}"
+                                th:selected="${searchStatus == s.name()}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm
+                    </button>
+                    <a th:href="@{/admin/orders}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Result summary -->
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <small class="text-muted">Tổng: <strong th:text="${totalElements}">0</strong> đơn hàng</small>
+        <small class="text-muted">
+            Trang <strong th:text="${currentPage + 1}">1</strong> /
+            <strong th:text="${totalPages > 0 ? totalPages : 1}">1</strong>
+        </small>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover table-striped m-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="px-3 py-3">#</th>
+                    <th class="py-3">Khách hàng</th>
+                    <th class="py-3">Tổng tiền</th>
+                    <th class="py-3">Trạng thái</th>
+                    <th class="py-3">Địa chỉ giao hàng</th>
+                    <th class="py-3">Đặt hàng lúc</th>
+                    <th class="py-3">Tạo lúc</th>
+                    <th class="py-3 text-end px-4">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(orders)}">
+                    <td colspan="8" class="text-center py-4 text-muted">Không tìm thấy đơn hàng nào.</td>
+                </tr>
+                <tr th:each="o : ${orders}">
+                    <td class="px-3 fw-bold text-primary">
+                        <a th:href="@{/admin/orders/{id}(id=${o.id})}"
+                           th:text="'#' + ${o.id}" class="text-decoration-none"></a>
+                    </td>
+                    <td>
+                        <div class="fw-medium" th:text="${o.userFullName}"></div>
+                        <small class="text-muted" th:text="'@' + ${o.username}"></small>
+                    </td>
+                    <td class="fw-medium text-success">
+                        <span th:text="${#numbers.formatDecimal(o.totalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${o.status.badgeClass}"
+                              th:text="${o.status.label}">
+                        </span>
+                    </td>
+                    <td class="text-muted small"
+                        style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                        th:title="${o.shippingAddress}"
+                        th:text="${o.shippingAddress != null and !o.shippingAddress.isBlank()} ? ${o.shippingAddress} : '—'">
+                    </td>
+                    <td class="text-muted small text-nowrap"
+                        th:text="${o.orderedAt != null} ? ${#temporals.format(o.orderedAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                    </td>
+                    <td class="text-muted small text-nowrap"
+                        th:text="${o.createdAt != null} ? ${#temporals.format(o.createdAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                    </td>
+                    <td class="text-end px-4">
+                        <!-- Inline status update -->
+                        <form th:action="@{/admin/orders/{id}/status(id=${o.id})}"
+                              method="post" class="d-inline-flex gap-1 align-items-center">
+                            <input th:if="${_csrf != null}" type="hidden"
+                                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="redirectTo" value="list"/>
+                            <select name="newStatus" class="form-select form-select-sm" style="width:auto">
+                                <option th:each="s : ${orderStatuses}"
+                                        th:value="${s.name()}"
+                                        th:text="${s.label}"
+                                        th:selected="${s == o.status}">
+                                </option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-success"
+                                    title="Cập nhật trạng thái">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </form>
+                        <!-- View detail -->
+                        <a th:href="@{/admin/orders/{id}(id=${o.id})}"
+                           class="btn btn-sm btn-outline-primary ms-1" title="Xem chi tiết">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center">
+        <ul class="pagination mb-0">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/orders(page=${currentPage - 1},size=${pageSize},status=${searchStatus},keyword=${searchKeyword},orderId=${searchOrderId})}">
+                    &laquo;
+                </a>
+            </li>
+            <th:block th:with="s=${T(java.lang.Math).max(0,currentPage-2)},e=${T(java.lang.Math).min(totalPages-1,currentPage+2)}">
+                <li class="page-item" th:each="i : ${#numbers.sequence(s,e)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:text="${i + 1}"
+                       th:href="@{/admin/orders(page=${i},size=${pageSize},status=${searchStatus},keyword=${searchKeyword},orderId=${searchOrderId})}">
+                    </a>
+                </li>
+            </th:block>
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/orders(page=${currentPage + 1},size=${pageSize},status=${searchStatus},keyword=${searchKeyword},orderId=${searchOrderId})}">
+                    &raquo;
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+</body>
+</html>

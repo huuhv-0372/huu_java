@@ -1,6 +1,7 @@
 package com.huuhv.foodsndrinks.controller.admin;
 
 import com.huuhv.foodsndrinks.enums.CategoryType;
+import com.huuhv.foodsndrinks.enums.OrderStatus;
 import com.huuhv.foodsndrinks.enums.ProductType;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,12 +16,11 @@ public class AdminLayoutModelAdvice {
     }
 
     @ModelAttribute("categoryTypes")
-    public CategoryType[] categoryTypes() {
-        return CategoryType.values();
-    }
+    public CategoryType[] categoryTypes() { return CategoryType.values(); }
 
     @ModelAttribute("productTypes")
-    public ProductType[] productTypes() {
-        return ProductType.values();
-    }
+    public ProductType[] productTypes() { return ProductType.values(); }
+
+    @ModelAttribute("orderStatuses")
+    public OrderStatus[] orderStatuses() { return OrderStatus.values(); }
 }
