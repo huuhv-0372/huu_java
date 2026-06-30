@@ -30,7 +30,7 @@
         <div class="card-body">
             <form th:action="@{/admin/products}" method="get" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />  <label class="form-label fw-medium">Tên sản phẩm</label>
+                    <label class="form-label fw-medium">Tên sản phẩm</label>
                     <input type="text" name="name" class="form-control" placeholder="Tìm theo tên..."
                            th:value="${searchName}">
                 </div>

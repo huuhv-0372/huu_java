@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+    <title>Quản lý Người Dùng</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">
+            <i class="fa-solid fa-users text-primary me-2"></i>Quản lý Người Dùng
+        </h2>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Search form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/users}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-medium">Tìm kiếm</label>
+                    <input type="text" name="keyword" class="form-control"
+                           placeholder="Username / Họ tên / Email / SĐT..."
+                           th:value="${searchKeyword}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-medium">Vai trò</label>
+                    <select name="role" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="r : ${roles}"
+                                th:value="${r.name()}"
+                                th:text="${r.label}"
+                                th:selected="${searchRole == r.name()}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-medium">Trạng thái</label>
+                    <select name="isActive" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="true"  th:selected="${searchIsActive == 'true'}">Đang hoạt động</option>
+                        <option value="false" th:selected="${searchIsActive == 'false'}">Đã khóa</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm
+                    </button>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Result summary -->
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <small class="text-muted">Tổng: <strong th:text="${totalElements}">0</strong> người dùng</small>
+        <small class="text-muted">
+            Trang <strong th:text="${currentPage + 1}">1</strong> /
+            <strong th:text="${totalPages > 0 ? totalPages : 1}">1</strong>
+        </small>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover table-striped m-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="px-3 py-3" style="width:50px">ID</th>
+                    <th class="py-3" style="width:50px">Avatar</th>
+                    <th class="py-3">Người dùng</th>
+                    <th class="py-3">Email</th>
+                    <th class="py-3">SĐT</th>
+                    <th class="py-3">Vai trò</th>
+                    <th class="py-3">Provider</th>
+                    <th class="py-3">Trạng thái</th>
+                    <th class="py-3">Ngày tạo</th>
+                    <th class="py-3 text-end px-4">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(users)}">
+                    <td colspan="10" class="text-center py-4 text-muted">Không tìm thấy người dùng nào.</td>
+                </tr>
+                <tr th:each="u : ${users}">
+                    <td class="px-3 fw-bold text-muted" th:text="${u.id}"></td>
+                    <td>
+                        <img th:if="${u.avatarUrl != null}"
+                             th:src="${u.avatarUrl}"
+                             width="36" height="36"
+                             class="rounded-circle border object-fit-cover"
+                             th:alt="${u.username}">
+                        <span th:unless="${u.avatarUrl != null}"
+                              class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary text-white fw-bold"
+                              style="width:36px;height:36px;font-size:0.85rem;"
+                              th:text="${#strings.substring(u.fullName, 0, 1).toUpperCase()}">
+                        </span>
+                    </td>
+                    <td>
+                        <div class="fw-medium" th:text="${u.fullName}"></div>
+                        <small class="text-muted" th:text="'@' + ${u.username}"></small>
+                    </td>
+                    <td class="text-muted small" th:text="${u.email}"></td>
+                    <td class="text-muted small" th:text="${u.phone != null ? u.phone : '—'}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${u.role.name() == 'ROLE_ADMIN'} ? 'bg-danger' : 'bg-primary'"
+                              th:text="${u.role.label}">
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border small"
+                              th:text="${u.authProvider}">
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${u.isActive} ? 'bg-success' : 'bg-secondary'"
+                              th:text="${u.isActive} ? 'Hoạt động' : 'Đã khóa'">
+                        </span>
+                    </td>
+                    <td class="text-muted small text-nowrap"
+                        th:text="${u.createdAt != null} ? ${#temporals.format(u.createdAt, 'dd/MM/yyyy')} : '—'">
+                    </td>
+                    <td class="text-end px-4">
+                        <!-- Edit -->
+                        <a th:href="@{/admin/users/{id}/edit(id=${u.id})}"
+                           class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <!-- Toggle active -->
+                        <form th:action="@{/admin/users/{id}/toggle-active(id=${u.id})}"
+                              method="post" class="d-inline">
+                            <input th:if="${_csrf != null}" type="hidden"
+                                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit"
+                                    class="btn btn-sm ms-1"
+                                    th:classappend="${u.isActive} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                    th:title="${u.isActive} ? 'Khóa tài khoản' : 'Mở khóa tài khoản'"
+                                    th:data-username="${u.username}"
+                                    th:data-active="${u.isActive}"
+                                    onclick="return confirmToggle(this)">
+                                <i class="fa-solid"
+                                   th:classappend="${u.isActive} ? 'fa-lock' : 'fa-lock-open'"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center">
+        <ul class="pagination mb-0">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/users(page=${currentPage-1},size=${pageSize},keyword=${searchKeyword},role=${searchRole},isActive=${searchIsActive})}">
+                    &laquo;
+                </a>
+            </li>
+            <th:block th:with="s=${T(java.lang.Math).max(0,currentPage-2)},e=${T(java.lang.Math).min(totalPages-1,currentPage+2)}">
+                <li class="page-item" th:each="i : ${#numbers.sequence(s,e)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:text="${i + 1}"
+                       th:href="@{/admin/users(page=${i},size=${pageSize},keyword=${searchKeyword},role=${searchRole},isActive=${searchIsActive})}">
+                    </a>
+                </li>
+            </th:block>
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/users(page=${currentPage+1},size=${pageSize},keyword=${searchKeyword},role=${searchRole},isActive=${searchIsActive})}">
+                    &raquo;
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+</body>
+
+<th:block layout:fragment="scripts">
+<script>
+function confirmToggle(btn) {
+    const username = btn.dataset.username;
+    const isActive = btn.dataset.active === 'true';
+    const action   = isActive ? 'Khóa' : 'Mở khóa';
+    return confirm(action + ' tài khoản @' + username + '?');
+}
+</script>
+</th:block>
+
+</html>
+

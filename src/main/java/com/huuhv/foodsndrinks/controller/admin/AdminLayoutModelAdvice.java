@@ -3,6 +3,7 @@ package com.huuhv.foodsndrinks.controller.admin;
 import com.huuhv.foodsndrinks.enums.CategoryType;
 import com.huuhv.foodsndrinks.enums.OrderStatus;
 import com.huuhv.foodsndrinks.enums.ProductType;
+import com.huuhv.foodsndrinks.enums.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -23,4 +24,7 @@ public class AdminLayoutModelAdvice {
 
     @ModelAttribute("orderStatuses")
     public OrderStatus[] orderStatuses() { return OrderStatus.values(); }
+
+    @ModelAttribute("roles")
+    public Role[] roles() { return Role.values(); }
 }

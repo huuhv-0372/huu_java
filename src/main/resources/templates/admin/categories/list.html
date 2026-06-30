@@ -29,7 +29,6 @@
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form th:action="@{/admin/categories}" method="get" class="row g-3 align-items-end">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="col-md-4">
                     <label class="form-label fw-medium">Tên danh mục</label>
                     <input type="text" name="name" class="form-control" placeholder="Tìm theo tên..."

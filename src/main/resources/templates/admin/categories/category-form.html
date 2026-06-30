@@ -28,6 +28,8 @@
                 <div class="card-body p-4">
                     <form th:action="${categoryReqDto.id != null || editId != null} ? @{/admin/categories/edit/{id}(id=${categoryReqDto.id != null ? categoryReqDto.id : editId})} : @{/admin/categories/add}"
                           method="post" th:object="${categoryReqDto}">
+                        <input th:if="${_csrf != null}" type="hidden"
+                               th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <input type="hidden" th:field="*{id}" />
 
                         <div class="mb-3">

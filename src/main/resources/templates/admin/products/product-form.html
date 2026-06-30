@@ -29,6 +29,8 @@
           enctype="multipart/form-data"
           th:object="${productReqDto}">
 
+        <input th:if="${_csrf != null}" type="hidden"
+               th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <input type="hidden" th:field="*{id}"/>
 
         <div class="row g-4">
