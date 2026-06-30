@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+    <title th:text="'Góp ý #' + ${suggestion.id}">Chi tiết góp ý</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0">
+            <i class="fa-solid fa-comment-dots text-primary me-2"></i>
+            Góp ý <span th:text="'#' + ${suggestion.id}" class="text-primary"></span>
+        </h2>
+        <a th:href="@{/admin/suggestions}" class="btn btn-secondary shadow-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Left: content + response form -->
+        <div class="col-lg-8">
+
+            <!-- Suggestion content -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold bg-white border-bottom">
+                    <i class="fa-solid fa-message me-2 text-primary"></i>Nội dung góp ý
+                </div>
+                <div class="card-body p-4">
+                    <p class="mb-0 lh-lg" style="white-space: pre-wrap;" th:text="${suggestion.content}"></p>
+                </div>
+            </div>
+
+            <!-- Admin response form -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header fw-bold bg-white border-bottom">
+                    <i class="fa-solid fa-reply me-2 text-primary"></i>Xử lý & Phản hồi
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/suggestions/{id}/update(id=${suggestion.id})}"
+                          method="post"
+                          th:object="${suggestionEditReqDto}">
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select" th:field="*{status}">
+                                <option th:each="s : ${suggestionStatuses}"
+                                        th:value="${s.name()}"
+                                        th:text="${s.label}">
+                                </option>
+                            </select>
+                            <div class="text-danger small mt-1"
+                                 th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">Ghi chú / Phản hồi cho khách</label>
+                            <textarea class="form-control" th:field="*{adminNote}" rows="4"
+                                      placeholder="Nhập phản hồi hoặc ghi chú nội bộ..."></textarea>
+                            <div class="form-text">Nội dung này có thể hiển thị cho người dùng.</div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{/admin/suggestions}" class="btn btn-outline-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary fw-bold px-4">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Lưu phản hồi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: user info + meta -->
+        <div class="col-lg-4">
+
+            <!-- Current status -->
+            <div class="card shadow-sm border-0 mb-4 text-center">
+                <div class="card-body py-4">
+                    <div class="text-muted small fw-medium mb-2">Trạng thái hiện tại</div>
+                    <span class="badge fs-6 py-2 px-3"
+                          th:classappend="${suggestion.status.badgeClass}"
+                          th:text="${suggestion.status.label}">
+                    </span>
+                </div>
+            </div>
+
+            <!-- User info -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header fw-bold bg-white border-bottom">
+                    <i class="fa-solid fa-user me-2 text-primary"></i>Người gửi
+                </div>
+                <div class="card-body">
+                    <dl class="mb-0 row g-2 small">
+                        <dt class="col-4 text-muted">Tên</dt>
+                        <dd class="col-8 fw-medium" th:text="${suggestion.userFullName}"></dd>
+                        <dt class="col-4 text-muted">Username</dt>
+                        <dd class="col-8" th:text="'@' + ${suggestion.username}"></dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Timestamps -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header fw-bold bg-white border-bottom">
+                    <i class="fa-regular fa-clock me-2 text-primary"></i>Thời gian
+                </div>
+                <div class="card-body">
+                    <dl class="mb-0 row g-2 small">
+                        <dt class="col-5 text-muted">Gửi lúc</dt>
+                        <dd class="col-7"
+                            th:text="${suggestion.createdAt != null} ? ${#temporals.format(suggestion.createdAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                        </dd>
+                        <dt class="col-5 text-muted">Cập nhật</dt>
+                        <dd class="col-7"
+                            th:text="${suggestion.updatedAt != null} ? ${#temporals.format(suggestion.updatedAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
+

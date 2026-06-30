@@ -21,10 +21,6 @@ public class UserAdminController {
 
     private final UserService userService;
 
-    // -------------------------------------------------------
-    // List + search
-    // -------------------------------------------------------
-
     @GetMapping
     public String listUsers(@RequestParam(required = false) String keyword,
                             @RequestParam(required = false) String role,
@@ -32,23 +28,22 @@ public class UserAdminController {
                             @RequestParam(defaultValue = "0") int page,
                             @RequestParam(defaultValue = "15") int size,
                             Model model) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.clamp(size, 1, 100);
         Page<UserResDto> userPage =
-                userService.searchUsers(keyword, role, isActive, page, size);
+                userService.searchUsers(keyword, role, isActive, safePage, safeSize);
 
         model.addAttribute("users",          userPage.getContent());
         model.addAttribute("currentPage",    userPage.getNumber());
         model.addAttribute("totalPages",     userPage.getTotalPages());
         model.addAttribute("totalElements",  userPage.getTotalElements());
-        model.addAttribute("pageSize",       size);
+        model.addAttribute("pageSize",       safeSize);
         model.addAttribute("searchKeyword",  keyword);
         model.addAttribute("searchRole",     role);
         model.addAttribute("searchIsActive", isActive);
+
         return "admin/users/list";
     }
-
-    // -------------------------------------------------------
-    // Edit form
-    // -------------------------------------------------------
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes ra) {
@@ -85,10 +80,6 @@ public class UserAdminController {
         }
         return "redirect:/admin/users";
     }
-
-    // -------------------------------------------------------
-    // Quick toggle active (from list)
-    // -------------------------------------------------------
 
     @PostMapping("/{id}/toggle-active")
     public String toggleActive(@PathVariable Long id, RedirectAttributes ra) {
