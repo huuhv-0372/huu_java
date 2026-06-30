@@ -141,7 +141,7 @@
                         </span>
                     </td>
                     <td class="text-muted small text-nowrap"
-                        th:text="${p.createdAt != null} ? ${#temporals.format(p.createdAt, 'dd/MM/yyyy')} : '—'">
+                        th:text="${p.createdAt != null ? #temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
                     </td>
                     <td class="text-end px-4">
                         <a th:href="@{/admin/products/edit/{id}(id=${p.id})}"
@@ -151,7 +151,9 @@
                         <form th:action="@{/admin/products/{id}/delete(id=${p.id})}"
                               method="post" class="d-inline"
                               onsubmit="return confirm('Xóa sản phẩm này? Tất cả ảnh sẽ bị xóa theo.');">
-                           <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
+                            <input th:if="${_csrf != null}" type="hidden"
+                                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </form>

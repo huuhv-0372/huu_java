@@ -31,7 +31,8 @@
                         </div>
 
                         <form th:action="@{/login}" method="post">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <input th:if="${_csrf != null}" type="hidden"
+                                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <div class="mb-3">
                                 <label for="username" class="form-label fw-medium">Email hoặc Username</label>
                                 <div class="input-group">

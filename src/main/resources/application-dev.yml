@@ -4,13 +4,13 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: validate # Validate schema; rely on Flyway migrations for changes
-    show-sql: true # Print SQL queries to console for easy debugging
-    properties:
-      hibernate:
-        format_sql: true
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate # Validate schema; rely on Flyway migrations for changes
+#    show-sql: true # Print SQL queries to console for easy debugging
+#    properties:
+#      hibernate:
+#        format_sql: true
   servlet:
     multipart:
       max-file-size: 10MB

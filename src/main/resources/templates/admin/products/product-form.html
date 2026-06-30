@@ -151,6 +151,25 @@
                     </div>
                 </div>
 
+                <!-- Timestamps (edit mode only) -->
+                <div class="card shadow-sm border-0 mb-4" th:if="${productDetail != null}">
+                    <div class="card-header fw-bold bg-white border-bottom">
+                        <i class="fa-regular fa-clock me-2 text-primary"></i>Thời gian
+                    </div>
+                    <div class="card-body">
+                        <dl class="mb-0 row g-2 small">
+                            <dt class="col-5 text-muted">Ngày tạo</dt>
+                            <dd class="col-7"
+                                th:text="${productDetail.createdAt != null ? #temporals.format(productDetail.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
+                            </dd>
+                            <dt class="col-5 text-muted">Cập nhật</dt>
+                            <dd class="col-7"
+                                th:text="${productDetail.updatedAt != null ? #temporals.format(productDetail.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}">
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
                 <!-- Action buttons -->
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary fw-bold">

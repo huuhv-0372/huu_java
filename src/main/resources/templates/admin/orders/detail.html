@@ -180,15 +180,15 @@
                     <dl class="mb-0 row g-1">
                         <dt class="col-5 text-muted small">Tạo đơn</dt>
                         <dd class="col-7 small"
-                            th:text="${order.createdAt != null} ? ${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                            th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
                         </dd>
                         <dt class="col-5 text-muted small">Đặt hàng</dt>
                         <dd class="col-7 small"
-                            th:text="${order.orderedAt != null} ? ${#temporals.format(order.orderedAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                            th:text="${order.orderedAt != null ? #temporals.format(order.orderedAt, 'dd/MM/yyyy HH:mm') : '—'}">
                         </dd>
                         <dt class="col-5 text-muted small">Cập nhật</dt>
                         <dd class="col-7 small"
-                            th:text="${order.updatedAt != null} ? ${#temporals.format(order.updatedAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                            th:text="${order.updatedAt != null ? #temporals.format(order.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}">
                         </dd>
                     </dl>
                 </div>

@@ -23,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsernameOrEmail(String username, String email);
 
+    long countByIsActiveTrue();
+
     @Query(value = """
             SELECT u FROM User u
             WHERE (:keyword IS NULL

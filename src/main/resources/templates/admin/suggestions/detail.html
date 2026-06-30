@@ -53,6 +53,8 @@
                     <form th:action="@{/admin/suggestions/{id}/update(id=${suggestion.id})}"
                           method="post"
                           th:object="${suggestionEditReqDto}">
+                        <input th:if="${_csrf != null}" type="hidden"
+                               th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <input type="hidden" th:field="*{id}"/>
 
                         <div class="mb-3">
@@ -124,11 +126,11 @@
                     <dl class="mb-0 row g-2 small">
                         <dt class="col-5 text-muted">Gửi lúc</dt>
                         <dd class="col-7"
-                            th:text="${suggestion.createdAt != null} ? ${#temporals.format(suggestion.createdAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                            th:text="${suggestion.createdAt != null ? #temporals.format(suggestion.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
                         </dd>
                         <dt class="col-5 text-muted">Cập nhật</dt>
                         <dd class="col-7"
-                            th:text="${suggestion.updatedAt != null} ? ${#temporals.format(suggestion.updatedAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                            th:text="${suggestion.updatedAt != null ? #temporals.format(suggestion.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}">
                         </dd>
                     </dl>
                 </div>

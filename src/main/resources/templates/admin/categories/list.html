@@ -109,10 +109,10 @@
                         th:text="${cat.description != null and !cat.description.isEmpty()} ? ${cat.description} : '—'">
                     </td>
                     <td class="text-muted small text-nowrap"
-                        th:text="${cat.createdAt != null} ? ${#temporals.format(cat.createdAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                        th:text="${cat.createdAt != null ? #temporals.format(cat.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
                     </td>
                     <td class="text-muted small text-nowrap"
-                        th:text="${cat.updatedAt != null} ? ${#temporals.format(cat.updatedAt, 'dd/MM/yyyy HH:mm')} : '—'">
+                        th:text="${cat.updatedAt != null ? #temporals.format(cat.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}">
                     </td>
                     <td class="text-end px-4">
                         <a th:href="@{/admin/categories/edit/{id}(id=${cat.id})}" class="btn btn-sm btn-outline-primary">
@@ -121,6 +121,8 @@
                         <form th:action="@{/admin/categories/{id}/delete(id=${cat.id})}"
                               method="post" class="d-inline"
                               onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này? Các sản phẩm thuộc danh mục sẽ bị ảnh hưởng.');">
+                            <input th:if="${_csrf != null}" type="hidden"
+                                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
