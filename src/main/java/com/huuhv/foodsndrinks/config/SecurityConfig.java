@@ -157,7 +157,7 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex
                         // Redirect to a friendly 403 page instead of the default whitelabel
-                        .accessDeniedPage("/error/403")
+                        .accessDeniedPage("/error")
                 );
 
         return http.build();

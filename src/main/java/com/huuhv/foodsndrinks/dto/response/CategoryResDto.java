@@ -2,20 +2,24 @@ package com.huuhv.foodsndrinks.dto.response;
 
 import com.huuhv.foodsndrinks.entity.Category;
 import com.huuhv.foodsndrinks.enums.CategoryType;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CategoryResDto {
 
-    private final Long id;
-    private final String name;
-    private final String slug;
-    private final CategoryType type;
-    private final String description;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private Long id;
+    private String name;
+    private String slug;
+    private CategoryType type;
+    private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     private CategoryResDto(Category category) {
         this.id          = category.getId();
