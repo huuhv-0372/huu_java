@@ -2,7 +2,6 @@ package com.huuhv.foodsndrinks.dto.response;
 
 import com.huuhv.foodsndrinks.entity.Order;
 import com.huuhv.foodsndrinks.entity.OrderDetail;
-import com.huuhv.foodsndrinks.entity.ProductImage;
 import com.huuhv.foodsndrinks.entity.User;
 import com.huuhv.foodsndrinks.enums.OrderStatus;
 import lombok.Getter;
@@ -10,6 +9,7 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -53,10 +53,14 @@ public class OrderResDto {
         return new OrderResDto(o, null);
     }
 
-    /** For detail page — items loaded */
-    public static OrderResDto forDetail(Order o, List<OrderDetail> details) {
+    /**
+     * For detail page — items built with pre-loaded primary image URLs.
+     * @param primaryImageUrls map of productId → primaryImageUrl (batch-loaded, no N+1)
+     */
+    public static OrderResDto forDetail(Order o, List<OrderDetail> details,
+                                        Map<Long, String> primaryImageUrls) {
         List<OrderItemDto> items = details.stream()
-                .map(OrderItemDto::from)
+                .map(od -> OrderItemDto.from(od, primaryImageUrls))
                 .collect(Collectors.toList());
         return new OrderResDto(o, items);
     }
@@ -73,23 +77,19 @@ public class OrderResDto {
         private final BigDecimal unitPrice;
         private final BigDecimal subtotal;
 
-        private OrderItemDto(OrderDetail od) {
-            this.id             = od.getId();
-            this.productId      = od.getProduct() != null ? od.getProduct().getId()   : null;
-            this.productName    = od.getProduct() != null ? od.getProduct().getName() : "—";
-            this.productImageUrl = od.getProduct() != null
-                    ? od.getProduct().getImages().stream()
-                          .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
-                          .map(ProductImage::getImageUrl)
-                          .findFirst().orElse(null)
-                    : null;
-            this.quantity       = od.getQuantity();
-            this.unitPrice      = od.getUnitPrice();
-            this.subtotal       = od.getSubtotal();
+        private OrderItemDto(OrderDetail od, String primaryImageUrl) {
+            this.id              = od.getId();
+            this.productId       = od.getProduct() != null ? od.getProduct().getId()   : null;
+            this.productName     = od.getProduct() != null ? od.getProduct().getName() : "—";
+            this.productImageUrl = primaryImageUrl;   // pre-loaded, no lazy fetch
+            this.quantity        = od.getQuantity();
+            this.unitPrice       = od.getUnitPrice();
+            this.subtotal        = od.getSubtotal();
         }
 
-        public static OrderItemDto from(OrderDetail od) {
-            return new OrderItemDto(od);
+        public static OrderItemDto from(OrderDetail od, Map<Long, String> primaryImageUrls) {
+            Long pid = od.getProduct() != null ? od.getProduct().getId() : null;
+            return new OrderItemDto(od, pid != null ? primaryImageUrls.get(pid) : null);
         }
     }
 }

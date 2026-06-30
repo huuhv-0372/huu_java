@@ -41,5 +41,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /** Fetch order + user eagerly for detail view */
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user WHERE o.id = :id")
     Optional<Order> findByIdWithUser(@Param("id") Long id);
+
+    /**
+     * Fetch order + user + orderDetails + products in 1 query for detail view.
+     * products is @ManyToOne (not a collection) so no MultipleBagFetchException.
+     */
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.user
+            LEFT JOIN FETCH o.orderDetails od
+            LEFT JOIN FETCH od.product
+            WHERE o.id = :id
+            """)
+    Optional<Order> findByIdWithDetailsAndProducts(@Param("id") Long id);
 }
 

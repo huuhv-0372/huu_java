@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,18 +44,26 @@ public class ProductService {
                                               String isAvailableStr, int page, int size) {
         ProductType productType = parseEnum(ProductType.class, type);
         Boolean isAvailable = parseBoolean(isAvailableStr);
-
         String nameParam = blank(name) ? null : name.trim();
 
-        return productRepository.search(nameParam, categoryId, productType, isAvailable,
-                        PageRequest.of(Math.max(page, 0), size))
-                .map(p -> {
-                    String primaryUrl = p.getImages().stream()
-                            .filter(ProductImage::getIsPrimary)
-                            .map(ProductImage::getImageUrl)
-                            .findFirst().orElse(null);
-                    return ProductResDto.forList(p, primaryUrl);
-                });
+        Page<Product> productPage = productRepository.search(
+                nameParam, categoryId, productType, isAvailable,
+                PageRequest.of(Math.max(page, 0), size));
+
+        // Batch-load primary image URLs in 1 query — avoids N+1
+        List<Long> ids = productPage.getContent().stream()
+                .map(Product::getId).collect(Collectors.toList());
+
+        Map<Long, String> primaryUrls = ids.isEmpty() ? Map.of() :
+                productImageRepository.findPrimaryUrlsByProductIds(ids)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                row -> (Long) row[0],
+                                row -> (String) row[1],
+                                (a, b) -> a   // keep first if somehow duplicate
+                        ));
+
+        return productPage.map(p -> ProductResDto.forList(p, primaryUrls.get(p.getId())));
     }
 
     @Transactional(readOnly = true)

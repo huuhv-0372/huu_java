@@ -5,6 +5,7 @@ import com.huuhv.foodsndrinks.entity.Order;
 import com.huuhv.foodsndrinks.entity.OrderDetail;
 import com.huuhv.foodsndrinks.enums.OrderStatus;
 import com.huuhv.foodsndrinks.repository.OrderRepository;
+import com.huuhv.foodsndrinks.repository.ProductImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,12 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderRepository orderRepository;
+    private final OrderRepository        orderRepository;
+    private final ProductImageRepository productImageRepository;
 
     @Transactional(readOnly = true)
     public Page<OrderResDto> searchOrders(String statusStr, String keyword,
@@ -34,19 +38,28 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderResDto getOrderDetail(Long id) {
-        Order order = orderRepository.findByIdWithUser(id)
+        // 1 query: order + user + orderDetails + products (FETCH JOIN, no lazy-load loops)
+        Order order = orderRepository.findByIdWithDetailsAndProducts(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng #" + id));
 
-        // Lazy-load order details + products within this transaction
         List<OrderDetail> details = order.getOrderDetails();
-        // Trigger lazy load of each product + its primary image
-        details.forEach(od -> {
-            if (od.getProduct() != null) {
-                od.getProduct().getImages().size(); // initialize images collection
-            }
-        });
 
-        return OrderResDto.forDetail(order, details);
+        // Batch-load primary image URLs in 1 query — avoids N+1 per product
+        List<Long> productIds = details.stream()
+                .filter(od -> od.getProduct() != null)
+                .map(od -> od.getProduct().getId())
+                .collect(Collectors.toList());
+
+        Map<Long, String> primaryUrls = productIds.isEmpty() ? Map.of() :
+                productImageRepository.findPrimaryUrlsByProductIds(productIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                row -> (Long) row[0],
+                                row -> (String) row[1],
+                                (a, b) -> a
+                        ));
+
+        return OrderResDto.forDetail(order, details, primaryUrls);
     }
 
     @Transactional
