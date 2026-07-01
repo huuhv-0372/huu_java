@@ -59,6 +59,41 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdWithDetailsAndProducts(@Param("id") Long id);
 
     // -------------------------------------------------------
+    // User-facing: cart & order history
+    // -------------------------------------------------------
+
+    /** The user's active cart (status = CART), with items + products pre-loaded */
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.orderDetails od
+            LEFT JOIN FETCH od.product
+            WHERE o.user.id = :userId AND o.status = 'CART'
+            """)
+    Optional<Order> findCartByUserId(@Param("userId") Long userId);
+
+    /** Same as {@link #findByIdWithDetailsAndProducts}, scoped to the owning user (prevents IDOR) */
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.user
+            LEFT JOIN FETCH o.orderDetails od
+            LEFT JOIN FETCH od.product
+            WHERE o.id = :id AND o.user.id = :userId
+            """)
+    Optional<Order> findByIdAndUserIdWithDetailsAndProducts(@Param("id") Long id, @Param("userId") Long userId);
+
+    /** Past orders (everything except CART) for the "order history" page */
+    @Query(value = """
+            SELECT o FROM Order o
+            WHERE o.user.id = :userId AND o.status <> 'CART'
+            ORDER BY o.createdAt DESC
+            """,
+            countQuery = """
+            SELECT COUNT(o) FROM Order o
+            WHERE o.user.id = :userId AND o.status <> 'CART'
+            """)
+    Page<Order> findOrderHistoryByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    // -------------------------------------------------------
     // Dashboard queries
     // -------------------------------------------------------
 

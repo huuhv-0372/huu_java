@@ -3,14 +3,14 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{web/layout/base}">
 <head>
-    <title>Menu Sản Phẩm</title>
+    <title th:text="${category != null ? category.name + ' - F&amp;B Store' : 'Menu Sản Phẩm'}">Menu Sản Phẩm</title>
 </head>
 <body>
 
 <div layout:fragment="content">
 
     <div class="text-center mb-5">
-        <h1 class="fw-bold">Khám Phá Thực Đơn</h1>
+        <h1 class="fw-bold" th:text="${category != null ? category.name : 'Khám Phá Thực Đơn'}">Khám Phá Thực Đơn</h1>
         <p class="text-muted">Lọc và tìm kiếm những món ăn, đồ uống yêu thích của bạn</p>
     </div>
 
@@ -22,35 +22,43 @@
                         <i class="fa-solid fa-filter text-primary"></i> Bộ lọc
                     </h5>
 
-                    <form action="/menu" method="get">
+                    <form th:action="@{${basePath}}" method="get">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Từ khóa</label>
+                            <input type="text" name="keyword" class="form-control"
+                                   placeholder="Tên món, mô tả, danh mục..." th:value="${currentKeyword}">
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label fw-medium">Phân loại</label>
                             <select name="type" class="form-select">
                                 <option value="">Tất cả</option>
-                                <option value="FOOD">Đồ ăn (Food)</option>
-                                <option value="DRINK">Đồ uống (Drink)</option>
+                                <option value="FOOD" th:selected="${currentType != null and currentType.name() == 'FOOD'}">Đồ ăn (Food)</option>
+                                <option value="DRINK" th:selected="${currentType != null and currentType.name() == 'DRINK'}">Đồ uống (Drink)</option>
                             </select>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-3" th:if="${category == null}">
                             <label class="form-label fw-medium">Danh mục</label>
                             <select name="categoryId" class="form-select">
                                 <option value="">Tất cả danh mục</option>
-                                <option value="1">Trà sữa</option>
-                                <option value="2">Đồ ăn nhanh</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.name}"
+                                        th:selected="${currentCategoryId == cat.id}">
+                                </option>
                             </select>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-medium">Sắp xếp theo</label>
                             <select name="sort" class="form-select">
-                                <option value="name_asc">Tên (A-Z)</option>
-                                <option value="price_asc">Giá (Thấp đến Cao)</option>
-                                <option value="price_desc">Giá (Cao xuống Thấp)</option>
-                                <option value="rating_desc">Đánh giá tốt nhất</option>
+                                <option value="name_asc" th:selected="${currentSort == 'name_asc'}">Tên (A-Z)</option>
+                                <option value="price_asc" th:selected="${currentSort == 'price_asc'}">Giá (Thấp đến Cao)</option>
+                                <option value="price_desc" th:selected="${currentSort == 'price_desc'}">Giá (Cao xuống Thấp)</option>
+                                <option value="rating_desc" th:selected="${currentSort == 'rating_desc'}">Đánh giá tốt nhất</option>
                             </select>
                         </div>
-
                         <button type="submit" class="btn btn-primary w-100">Áp dụng bộ lọc</button>
                     </form>
                 </div>
@@ -58,35 +66,40 @@
         </aside>
 
         <div class="col-lg-9">
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+            <p class="text-muted mb-3" th:unless="${productPage.empty}">
+                Tìm thấy <span class="fw-bold" th:text="${productPage.totalElements}">0</span> sản phẩm
+            </p>
 
-                <div class="col">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div th:if="${productPage.empty}" class="col-12 text-center py-5">
+                    <h5 class="text-muted">Không tìm thấy sản phẩm nào phù hợp!</h5>
+                </div>
+
+                <div class="col" th:each="product : ${productPage.content}">
                     <div class="card h-100 shadow-sm border-0 product-card">
-                        <img src="https://images.unsplash.com/photo-1572449043416-55f4685c9bb7?auto=format&fit=crop&w=400&q=80"
+                        <img th:src="${primaryImageUrls.get(product.id)} ?: '/uploads/products/default-food.png'"
                              class="card-img-top" alt="Product Image" style="height: 200px; object-fit: cover;">
 
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title fw-bold text-truncate mb-0">Burger Phô Mai Sợi</h6>
-                                <span class="badge bg-warning text-dark">FOOD</span>
+                                <h6 class="card-title fw-bold text-truncate mb-0" th:text="${product.name}">Tên sản phẩm</h6>
+                                <span class="badge"
+                                      th:classappend="${product.type.name() == 'FOOD' ? 'bg-warning text-dark' : 'bg-info text-dark'}"
+                                      th:text="${product.type}">FOOD</span>
                             </div>
 
                             <div class="text-warning small mb-2">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star-half-stroke"></i>
-                                <span class="text-muted ms-1">(4.5)</span>
+                                <i class="fa-solid fa-star"></i> <span class="text-dark fw-bold" th:text="${product.ratingAvg}">5.0</span>
                             </div>
 
-                            <h5 class="text-primary fw-bold mt-auto mb-3">$12.50</h5>
+                            <h5 class="text-primary fw-bold mt-auto mb-3" th:text="${'$' + product.price}">$0.00</h5>
 
                             <div class="d-flex gap-2">
-                                <a href="/products/burger-pho-mai" class="btn btn-outline-secondary btn-sm flex-grow-1">Chi tiết</a>
+                                <a th:href="@{/products/{slug}(slug=${product.slug})}" class="btn btn-outline-secondary btn-sm flex-grow-1">Chi tiết</a>
+
                                 <form action="/cart/add" method="post" class="flex-grow-1">
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <input type="hidden" name="productId" value="1">
+                                    <input type="hidden" name="productId" th:value="${product.id}">
                                     <button type="submit" class="btn btn-primary btn-sm w-100">
                                         <i class="fa-solid fa-cart-plus"></i> Thêm
                                     </button>
@@ -97,12 +110,18 @@
                 </div>
             </div>
 
-            <nav class="mt-5">
+            <nav class="mt-5" th:if="${productPage.totalPages > 1}">
                 <ul class="pagination justify-content-center">
-                    <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                    <li class="page-item" th:classappend="${productPage.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{${basePath}(page=${productPage.number - 1}, type=${currentType}, categoryId=${currentCategoryId}, keyword=${currentKeyword}, sort=${currentSort})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}"
+                        th:classappend="${productPage.number == i ? 'active' : ''}">
+                        <a class="page-link" th:href="@{${basePath}(page=${i}, type=${currentType}, categoryId=${currentCategoryId}, keyword=${currentKeyword}, sort=${currentSort})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${productPage.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{${basePath}(page=${productPage.number + 1}, type=${currentType}, categoryId=${currentCategoryId}, keyword=${currentKeyword}, sort=${currentSort})}">Sau</a>
+                    </li>
                 </ul>
             </nav>
         </div>

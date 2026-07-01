@@ -1,5 +1,6 @@
 package com.huuhv.foodsndrinks.service;
 
+import com.huuhv.foodsndrinks.dto.request.ProfileUpdateReqDto;
 import com.huuhv.foodsndrinks.dto.request.RegisterReqDto;
 import com.huuhv.foodsndrinks.dto.request.UserEditReqDto;
 import com.huuhv.foodsndrinks.dto.response.UserResDto;
@@ -51,6 +52,57 @@ public class UserService {
         user.setIsActive(true);
         userRepository.save(user);
         log.info("User registered: {}", dto.getUsername());
+    }
+
+    // -------------------------------------------------------
+    // Web: resolve logged-in principal → domain User
+    // -------------------------------------------------------
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public User getCurrentUser(String usernameOrEmail) {
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng!"));
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ProfileUpdateReqDto getProfileForEdit(Long id) {
+        User u = findById(id);
+        ProfileUpdateReqDto dto = new ProfileUpdateReqDto();
+        dto.setFullName(u.getFullName());
+        dto.setEmail(u.getEmail());
+        dto.setPhone(u.getPhone());
+        return dto;
+    }
+
+    @Transactional
+    public void updateProfile(Long id, ProfileUpdateReqDto dto) {
+        User user = findById(id);
+
+        if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
+            throw new IllegalArgumentException("Email đã được sử dụng bởi tài khoản khác!");
+        }
+        if (userRepository.existsByPhoneAndIdNot(dto.getPhone(), id)) {
+            throw new IllegalArgumentException("Số điện thoại đã được sử dụng bởi tài khoản khác!");
+        }
+
+        if (!blank(dto.getNewPassword())) {
+            if (dto.getNewPassword().length() < 6 || dto.getNewPassword().length() > 32) {
+                throw new IllegalArgumentException("Mật khẩu mới phải từ 6 đến 32 ký tự.");
+            }
+            if (blank(dto.getCurrentPassword()) || !passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+                throw new IllegalArgumentException("Mật khẩu hiện tại không đúng!");
+            }
+            if (!dto.getNewPassword().equals(dto.getConfirmNewPassword())) {
+                throw new IllegalArgumentException("Mật khẩu xác nhận mới không khớp!");
+            }
+            user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        }
+
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        userRepository.save(user);
+        log.info("User #{} updated own profile", id);
     }
 
     // -------------------------------------------------------

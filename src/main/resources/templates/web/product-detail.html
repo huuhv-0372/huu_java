@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/base}">
+<head>
+    <title th:text="${product.name} + ' - F&B Store'">Chi tiết sản phẩm</title>
+
+    <th:block layout:fragment="meta-tags">
+        <meta property="og:title" th:content="${product.name}" />
+        <meta property="og:description" th:content="${product.description != null ? product.description : 'Món ngon tuyệt đỉnh tại F&B Store!'}" />
+        <meta property="og:image" th:content="${baseUrl + product.primaryImageUrl}" />
+        <meta property="og:type" content="product" />
+    </th:block>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/menu">Menu</a></li>
+            <li class="breadcrumb-item" th:if="${product.category != null}">
+                <a th:href="@{/categories/{slug}(slug=${product.category.slug})}" th:text="${product.category.name}">Category</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Product Name</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <img id="mainProductImage" th:src="${product.primaryImageUrl}" class="img-fluid rounded shadow-sm w-100 mb-2" style="object-fit: cover; max-height: 400px;">
+
+            <div class="d-flex gap-2 overflow-auto" th:if="${product.images.size() > 1}">
+                <img th:each="img : ${product.images}" th:src="${img.imageUrl}" th:alt="${product.name}"
+                     class="rounded border" style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+                     onclick="document.getElementById('mainProductImage').src = this.src">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <a th:if="${product.category != null}" class="badge bg-primary fs-6 text-decoration-none" th:href="@{/categories/{slug}(slug=${product.category.slug})}" th:text="${product.category.name}">Category</a>
+                <div class="text-warning fs-5">
+                    <i class="fa-solid fa-star"></i> <span class="text-dark fw-bold ms-1" th:text="${product.ratingAvg}">5.0</span>
+                </div>
+            </div>
+
+            <h1 class="fw-bold mb-3" th:text="${product.name}">Tên Sản Phẩm</h1>
+            <h2 class="text-primary fw-bold mb-4" th:text="${'$' + product.price}">$0.00</h2>
+
+            <p class="text-muted lh-lg mb-4" th:text="${product.description}">Mô tả sản phẩm sẽ nằm ở đây...</p>
+
+            <form th:action="@{/cart/add}" method="post" class="mb-4 bg-light p-4 rounded border">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" name="productId" th:value="${product.id}">
+
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        <label for="quantity" class="col-form-label fw-bold">Số lượng:</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="50">
+                    </div>
+                    <div class="col-12 col-md-auto mt-3 mt-md-0 ms-md-auto">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fa-solid fa-cart-plus me-2"></i>Thêm Vào Giỏ
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="d-flex align-items-center gap-3">
+                <span class="fw-medium text-muted">Chia sẻ: </span>
+                <a th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + baseUrl + '/products/' + product.slug}"
+                   target="_blank" class="btn btn-outline-primary btn-sm rounded-circle" style="width: 35px; height: 35px; padding-top: 5px;">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+                <a href="#" class="btn btn-outline-info btn-sm rounded-circle" style="width: 35px; height: 35px; padding-top: 5px;">
+                    <i class="fa-brands fa-twitter"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -45,6 +45,12 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
+    public Category getCategoryBySlug(String slug) {
+        return categoryRepository.findBySlug(slug)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục!"));
+    }
+
+    @Transactional(readOnly = true)
     public CategoryReqDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục!"));

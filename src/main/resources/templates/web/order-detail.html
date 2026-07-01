@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/base}">
+<head>
+    <title th:text="'Đơn hàng #' + ${order.id}">Chi tiết đơn hàng</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/orders">Lịch sử đơn hàng</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="'Đơn hàng #' + ${order.id}">Đơn hàng</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold mb-0" th:text="'Đơn hàng #' + ${order.id}">Đơn hàng</h1>
+        <span class="badge fs-6" th:classappend="${order.status.badgeClass}" th:text="${order.status.label}">Trạng thái</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th class="text-center">Đơn giá</th>
+                            <th class="text-center">Số lượng</th>
+                            <th class="text-end">Tạm tính</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${order.items}">
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img th:src="${item.productImageUrl != null ? item.productImageUrl : '/uploads/products/default-food.png'}"
+                                         style="width: 50px; height: 50px; object-fit: cover;" class="rounded">
+                                    <span class="fw-medium" th:text="${item.productName}">Tên sản phẩm</span>
+                                </div>
+                            </td>
+                            <td class="text-center" th:text="${'$' + item.unitPrice}">$0.00</td>
+                            <td class="text-center" th:text="${item.quantity}">1</td>
+                            <td class="text-end fw-bold" th:text="${'$' + item.subtotal}">$0.00</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 p-4">
+                <h5 class="fw-bold mb-3">Thông Tin Đơn Hàng</h5>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Ngày đặt</span>
+                    <span th:text="${#temporals.format(order.orderedAt != null ? order.orderedAt : order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+                </div>
+
+                <div class="mb-2">
+                    <span class="text-muted d-block">Địa chỉ giao hàng</span>
+                    <span class="fw-medium" th:text="${order.shippingAddress}">—</span>
+                </div>
+
+                <div class="mb-3" th:if="${order.note != null and !order.note.isBlank()}">
+                    <span class="text-muted d-block">Ghi chú</span>
+                    <span th:text="${order.note}">—</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <span class="text-muted">Tổng cộng</span>
+                    <span class="fw-bold fs-5 text-primary" th:text="${'$' + order.totalPrice}">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

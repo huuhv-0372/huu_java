@@ -33,4 +33,4 @@ build/
 .vscode/
 
 ### Ignore ###
-uploads/products/*
+uploads/*
