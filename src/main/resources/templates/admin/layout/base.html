@@ -18,12 +18,35 @@
         <i class="fa-solid fa-burger text-warning"></i> F&B Admin
     </div>
     <div class="nav flex-column mt-3">
-        <a href="/admin/dashboard" class="active"><i class="fa-solid fa-chart-pie me-2"></i> Dashboard</a>
-        <a href="/admin/categories"><i class="fa-solid fa-tags me-2"></i> Manage Categories</a>
-        <a href="/admin/products"><i class="fa-solid fa-box-open me-2"></i> Manage Products</a>
-        <a href="/admin/orders"><i class="fa-solid fa-cart-shopping me-2"></i> Manage Orders</a>
-        <a href="/admin/users"><i class="fa-solid fa-users me-2"></i> Manage Users</a>
-        <a href="/admin/suggestions"><i class="fa-solid fa-comment-dots me-2"></i> User Suggestions</a>
+        <a th:href="@{/admin/dashboard}"
+           th:classappend="${currentPath == '/admin' || currentPath == '/admin/' || currentPath == '/admin/dashboard'} ? ' active'">
+            <i class="fa-solid fa-chart-pie me-2"></i> Dashboard
+        </a>
+
+        <a th:href="@{/admin/categories}"
+           th:classappend="${#strings.startsWith(currentPath, '/admin/categories')} ? ' active'">
+            <i class="fa-solid fa-tags me-2"></i> Manage Categories
+        </a>
+
+        <a th:href="@{/admin/products}"
+           th:classappend="${#strings.startsWith(currentPath, '/admin/products')} ? ' active'">
+            <i class="fa-solid fa-box-open me-2"></i> Manage Products
+        </a>
+
+        <a th:href="@{/admin/orders}"
+           th:classappend="${#strings.startsWith(currentPath, '/admin/orders')} ? ' active'">
+            <i class="fa-solid fa-cart-shopping me-2"></i> Manage Orders
+        </a>
+
+        <a th:href="@{/admin/users}"
+           th:classappend="${#strings.startsWith(currentPath, '/admin/users')} ? ' active'">
+            <i class="fa-solid fa-users me-2"></i> Manage Users
+        </a>
+
+        <a th:href="@{/admin/suggestions}"
+           th:classappend="${#strings.startsWith(currentPath, '/admin/suggestions')} ? ' active'">
+            <i class="fa-solid fa-comment-dots me-2"></i> User Suggestions
+        </a>
     </div>
 </div>
 

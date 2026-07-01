@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout/base}">
+<head>
+    <title>Quản lý Danh Mục</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0"><i class="fa-solid fa-tags text-primary me-2"></i>Quản lý Danh Mục</h2>
+        <a th:href="@{/admin/categories/add}" class="btn btn-primary fw-medium shadow-sm">
+            <i class="fa-solid fa-plus me-1"></i> Thêm Mới
+        </a>
+    </div>
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Search form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/categories}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-medium">Tên danh mục</label>
+                    <input type="text" name="name" class="form-control" placeholder="Tìm theo tên..."
+                           th:value="${searchName}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-medium">Phân loại</label>
+                    <select name="type" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option th:each="t : ${categoryTypes}"
+                                th:value="${t.name()}"
+                                th:text="${t.label + ' (' + t.name() + ')'}"
+                                th:selected="${searchType == t.name()}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-medium">Mô tả</label>
+                    <input type="text" name="description" class="form-control" placeholder="Tìm theo mô tả..."
+                           th:value="${searchDescription}">
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Tìm
+                    </button>
+                    <a th:href="@{/admin/categories}" class="btn btn-outline-secondary w-100">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Result summary -->
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <small class="text-muted">
+            Tổng: <strong th:text="${totalElements}">0</strong> danh mục
+        </small>
+        <small class="text-muted">
+            Trang <strong th:text="${currentPage + 1}">1</strong> /
+            <strong th:text="${totalPages > 0 ? totalPages : 1}">1</strong>
+        </small>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover table-striped m-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="px-4 py-3">ID</th>
+                    <th class="py-3">Tên Danh Mục</th>
+                    <th class="py-3">Slug (URL)</th>
+                    <th class="py-3">Phân Loại</th>
+                    <th class="py-3">Mô Tả</th>
+                    <th class="py-3">Ngày tạo</th>
+                    <th class="py-3">Cập nhật</th>
+                    <th class="py-3 text-end px-4">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(categories)}">
+                    <td colspan="8" class="text-center py-4 text-muted">Không tìm thấy danh mục nào.</td>
+                </tr>
+                <tr th:each="cat : ${categories}">
+                    <td class="px-4 fw-bold" th:text="${cat.id}">1</td>
+                    <td class="fw-medium text-primary" th:text="${cat.name}">Trà sữa</td>
+                    <td>
+                        <span class="badge bg-light text-dark border" th:text="${cat.slug}">tra-sua</span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${cat.type.name() == 'FOOD' ? 'bg-warning text-dark' : (cat.type.name() == 'DRINK' ? 'bg-info text-dark' : 'bg-secondary')}"
+                              th:text="${cat.type}">FOOD</span>
+                    </td>
+                    <td class="text-muted small" style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                        th:title="${cat.description}"
+                        th:text="${cat.description != null and !cat.description.isEmpty()} ? ${cat.description} : '—'">
+                    </td>
+                    <td class="text-muted small text-nowrap"
+                        th:text="${cat.createdAt != null ? #temporals.format(cat.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">
+                    </td>
+                    <td class="text-muted small text-nowrap"
+                        th:text="${cat.updatedAt != null ? #temporals.format(cat.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}">
+                    </td>
+                    <td class="text-end px-4">
+                        <a th:href="@{/admin/categories/edit/{id}(id=${cat.id})}" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <form th:action="@{/admin/categories/{id}/delete(id=${cat.id})}"
+                              method="post" class="d-inline"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này? Các sản phẩm thuộc danh mục sẽ bị ảnh hưởng.');">
+                            <input th:if="${_csrf != null}" type="hidden"
+                                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-sm btn-outline-danger ms-1">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="Phân trang">
+        <ul class="pagination mb-0">
+            <!-- Prev -->
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/categories(page=${currentPage - 1}, size=${pageSize}, name=${searchName}, type=${searchType}, description=${searchDescription})}"
+                   aria-label="Trước">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <!-- Page numbers (show up to 5 pages around current) -->
+            <th:block th:with="
+                startPage=${T(java.lang.Math).max(0, currentPage - 2)},
+                endPage=${T(java.lang.Math).min(totalPages - 1, currentPage + 2)}">
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link"
+                       th:text="${i + 1}"
+                       th:href="@{/admin/categories(page=${i}, size=${pageSize}, name=${searchName}, type=${searchType}, description=${searchDescription})}">1</a>
+                </li>
+            </th:block>
+
+            <!-- Next -->
+            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/categories(page=${currentPage + 1}, size=${pageSize}, name=${searchName}, type=${searchType}, description=${searchDescription})}"
+                   aria-label="Sau">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>
