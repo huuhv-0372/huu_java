@@ -97,7 +97,7 @@
                             <div class="d-flex gap-2">
                                 <a th:href="@{/products/{slug}(slug=${product.slug})}" class="btn btn-outline-secondary btn-sm flex-grow-1">Chi tiết</a>
 
-                                <form action="/cart/add" method="post" class="flex-grow-1">
+                                <form th:action="@{/cart/add}" method="post" class="js-add-to-cart-form flex-grow-1">
                                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <input type="hidden" name="productId" th:value="${product.id}">
                                     <button type="submit" class="btn btn-primary btn-sm w-100">

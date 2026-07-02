@@ -19,13 +19,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <div th:if="${cart == null}" class="text-center py-5">
+    <div id="cartEmptyState" th:classappend="${cart != null} ? 'd-none' : ''" class="text-center py-5">
         <i class="fa-solid fa-cart-shopping fs-1 text-muted mb-3"></i>
         <h5 class="text-muted">Giỏ hàng của bạn đang trống!</h5>
         <a href="/" class="btn btn-primary mt-3">Tiếp tục mua sắm</a>
     </div>
 
-    <div th:if="${cart != null}" class="row g-4">
+    <div id="cartFullState" th:classappend="${cart == null} ? 'd-none' : ''" class="row g-4">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="table-responsive">
@@ -34,13 +34,13 @@
                         <tr>
                             <th>Sản phẩm</th>
                             <th class="text-center">Đơn giá</th>
-                            <th class="text-center" style="width: 160px;">Số lượng</th>
+                            <th class="text-center" style="width: 170px;">Số lượng</th>
                             <th class="text-end">Tạm tính</th>
                             <th></th>
                         </tr>
                         </thead>
-                        <tbody>
-                        <tr th:each="item : ${cart.items}">
+                        <tbody id="cartItemsBody">
+                        <tr th:each="item : ${cart != null ? cart.items : {}}" th:data-detail-id="${item.id}">
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <img th:src="${item.productImageUrl != null ? item.productImageUrl : '/uploads/products/default-food.png'}"
@@ -50,23 +50,18 @@
                             </td>
                             <td class="text-center" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</td>
                             <td>
-                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="d-flex gap-1">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <input type="number" name="quantity" th:value="${item.quantity}" min="1" max="50"
-                                           class="form-control form-control-sm" style="width: 70px;">
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm" title="Cập nhật">
-                                        <i class="fa-solid fa-rotate"></i>
-                                    </button>
-                                </form>
+                                <div class="d-flex align-items-center gap-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm js-qty-decrease" th:disabled="${item.quantity <= 1}">-</button>
+                                    <input type="number" class="form-control form-control-sm text-center js-qty-input"
+                                           style="width: 55px;" th:value="${item.quantity}" min="1" max="50">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm js-qty-increase" th:disabled="${item.quantity >= 50}">+</button>
+                                </div>
                             </td>
                             <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</td>
                             <td class="text-end">
-                                <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-outline-danger btn-sm js-remove-item" title="Xóa">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         </tbody>
@@ -80,7 +75,8 @@
                 <h5 class="fw-bold mb-3">Thanh Toán</h5>
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
                     <span class="text-muted">Tổng cộng</span>
-                    <span class="fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(cart.totalPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</span>
+                    <span id="cartTotalPrice" class="fw-bold fs-5 text-primary"
+                          th:text="${cart != null ? (#numbers.formatDecimal(cart.totalPrice, 1, 'POINT', 0, 'COMMA') + ' đ') : '0 đ'}">0 đ</span>
                 </div>
 
                 <form th:action="@{/cart/checkout}" method="post">
@@ -102,6 +98,10 @@
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/web/cart.js}"></script>
+</th:block>
 
 </body>
 </html>

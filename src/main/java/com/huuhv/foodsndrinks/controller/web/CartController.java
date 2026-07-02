@@ -1,16 +1,20 @@
 package com.huuhv.foodsndrinks.controller.web;
 
+import com.huuhv.foodsndrinks.dto.response.CartPayloadResDto;
+import com.huuhv.foodsndrinks.dto.response.ErrorResponse;
 import com.huuhv.foodsndrinks.dto.response.OrderResDto;
 import com.huuhv.foodsndrinks.entity.User;
 import com.huuhv.foodsndrinks.service.OrderService;
 import com.huuhv.foodsndrinks.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
@@ -30,50 +34,51 @@ public class CartController {
         return "web/cart";
     }
 
+    // Add/update/remove are called via fetch() from the storefront — no page reload,
+    // so they return the fresh cart state as JSON instead of a redirect.
+
     @PostMapping("/cart/add")
-    public String addToCart(@RequestParam Long productId,
-                            @RequestParam(defaultValue = "1") int quantity,
-                            Principal principal,
-                            RedirectAttributes ra) {
+    @ResponseBody
+    public ResponseEntity<?> addToCart(@RequestParam Long productId,
+                                       @RequestParam(defaultValue = "1") int quantity,
+                                       Principal principal) {
         User user = userService.getCurrentUser(principal.getName());
         try {
             orderService.addToCart(user, productId, quantity);
-            ra.addFlashAttribute("successMessage", "Đã thêm vào giỏ hàng!");
+            return ResponseEntity.ok(buildCartPayload(user.getId()));
         } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().message(e.getMessage()).build());
         }
-        return "redirect:/cart";
     }
 
     @PostMapping("/cart/update/{detailId}")
-    public String updateCartItem(@PathVariable Long detailId,
-                                 @RequestParam int quantity,
-                                 Principal principal,
-                                 RedirectAttributes ra) {
+    @ResponseBody
+    public ResponseEntity<?> updateCartItem(@PathVariable Long detailId,
+                                            @RequestParam int quantity,
+                                            Principal principal) {
         User user = userService.getCurrentUser(principal.getName());
         try {
             orderService.updateCartItemQuantity(user, detailId, quantity);
-            ra.addFlashAttribute("successMessage", "Đã cập nhật giỏ hàng!");
+            return ResponseEntity.ok(buildCartPayload(user.getId()));
         } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().message(e.getMessage()).build());
         }
-        return "redirect:/cart";
     }
 
     @PostMapping("/cart/remove/{detailId}")
-    public String removeCartItem(@PathVariable Long detailId,
-                                 Principal principal,
-                                 RedirectAttributes ra) {
+    @ResponseBody
+    public ResponseEntity<?> removeCartItem(@PathVariable Long detailId,
+                                            Principal principal) {
         User user = userService.getCurrentUser(principal.getName());
         try {
             orderService.removeCartItem(user, detailId);
-            ra.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi giỏ hàng!");
+            return ResponseEntity.ok(buildCartPayload(user.getId()));
         } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().message(e.getMessage()).build());
         }
-        return "redirect:/cart";
     }
 
+    // Checkout still navigates to a new page (order confirmation / history), so it stays a normal redirect flow.
     @PostMapping("/cart/checkout")
     public String checkout(@RequestParam String shippingAddress,
                            @RequestParam(required = false) String note,
@@ -88,5 +93,11 @@ public class CartController {
             ra.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/cart";
         }
+    }
+
+    private CartPayloadResDto buildCartPayload(Long userId) {
+        OrderResDto cart = orderService.getCartForUser(userId);
+        int cartItemCount = orderService.getCartItemCount(userId);
+        return new CartPayloadResDto(cart, cartItemCount);
     }
 }
