@@ -40,7 +40,7 @@ public class WebController {
             Model model
     ) {
         loadProductList(type, categoryId, keyword, sort, page, model);
-        model.addAttribute("basePath", "/");
+        model.addAttribute("basePath", "/menu");
         return "web/index";
     }
 

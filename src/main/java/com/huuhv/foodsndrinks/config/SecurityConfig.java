@@ -128,7 +128,7 @@ public class SecurityConfig {
                         // Admin dashboard — ROLE_ADMIN only
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers("/profile", "/cart/**", "/orders/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/profile", "/cart/**", "/orders/**", "/suggest").hasAnyRole("USER", "ADMIN")
                         // Anything else requires the user to be logged in
                         .anyRequest().authenticated()
                 )
