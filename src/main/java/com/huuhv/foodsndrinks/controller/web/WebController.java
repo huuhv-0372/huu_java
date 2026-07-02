@@ -2,9 +2,12 @@ package com.huuhv.foodsndrinks.controller.web;
 
 import com.huuhv.foodsndrinks.entity.Category;
 import com.huuhv.foodsndrinks.entity.Product;
+import com.huuhv.foodsndrinks.entity.User;
 import com.huuhv.foodsndrinks.enums.ProductType;
 import com.huuhv.foodsndrinks.service.CategoryService;
 import com.huuhv.foodsndrinks.service.ProductService;
+import com.huuhv.foodsndrinks.service.RatingService;
+import com.huuhv.foodsndrinks.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +30,10 @@ public class WebController {
 
     private static final int PAGE_SIZE = 9;
 
-    private final ProductService productService;
+    private final ProductService  productService;
     private final CategoryService categoryService;
+    private final RatingService   ratingService;
+    private final UserService     userService;
 
     // Filter products
     @GetMapping({"", "/", "/menu"})
@@ -69,13 +75,20 @@ public class WebController {
 
     // Product detail
     @GetMapping("/products/{slug}")
-    public String productDetail(@PathVariable String slug, Model model) {
+    public String productDetail(@PathVariable String slug, Principal principal, Model model) {
 
         Product product = productService.getProductBySlug(slug);
 
         model.addAttribute("product", product);
         // Resolved from the actual incoming request — never hardcode scheme/host/port in templates.
         model.addAttribute("baseUrl", ServletUriComponentsBuilder.fromCurrentContextPath().toUriString());
+        model.addAttribute("ratings", ratingService.getRatingsForProduct(product.getId()));
+
+        if (principal != null) {
+            User user = userService.getCurrentUser(principal.getName());
+            model.addAttribute("myRating", ratingService.getMyRating(product.getId(), user.getId()));
+        }
+
         return "web/product-detail";
     }
 

@@ -123,6 +123,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Static assets
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico").permitAll()
+                        // Rating submission requires login — must be matched before the public /products/** rule below
+                        .requestMatchers("/products/*/rate").hasAnyRole("USER", "ADMIN")
                         // Public pages
                         .requestMatchers("/", "/menu", "/products", "/products/**", "/categories/**", "/contact", "/login", "/register", "/error").permitAll()
                         // Admin dashboard — ROLE_ADMIN only
