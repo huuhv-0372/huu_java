@@ -42,9 +42,9 @@
                                     <span class="fw-medium" th:text="${item.productName}">Tên sản phẩm</span>
                                 </div>
                             </td>
-                            <td class="text-center" th:text="${'$' + item.unitPrice}">$0.00</td>
+                            <td class="text-center" th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</td>
                             <td class="text-center" th:text="${item.quantity}">1</td>
-                            <td class="text-end fw-bold" th:text="${'$' + item.subtotal}">$0.00</td>
+                            <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</td>
                         </tr>
                         </tbody>
                     </table>
@@ -73,7 +73,7 @@
 
                 <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                     <span class="text-muted">Tổng cộng</span>
-                    <span class="fw-bold fs-5 text-primary" th:text="${'$' + order.totalPrice}">$0.00</span>
+                    <span class="fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(order.totalPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</span>
                 </div>
             </div>
         </div>

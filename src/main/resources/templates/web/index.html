@@ -92,7 +92,7 @@
                                 <i class="fa-solid fa-star"></i> <span class="text-dark fw-bold" th:text="${product.ratingAvg}">5.0</span>
                             </div>
 
-                            <h5 class="text-primary fw-bold mt-auto mb-3" th:text="${'$' + product.price}">$0.00</h5>
+                            <h5 class="text-primary fw-bold mt-auto mb-3" th:text="${#numbers.formatDecimal(product.price, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</h5>
 
                             <div class="d-flex gap-2">
                                 <a th:href="@{/products/{slug}(slug=${product.slug})}" class="btn btn-outline-secondary btn-sm flex-grow-1">Chi tiết</a>

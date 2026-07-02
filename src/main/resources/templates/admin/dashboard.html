@@ -24,7 +24,7 @@
                     <div>
                         <div class="text-muted small">Doanh thu</div>
                         <div class="fw-bold fs-5 text-success"
-                             th:text="${#numbers.formatDecimal(stats.totalRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                             th:text="${#numbers.formatDecimal(stats.totalRevenue, 1, 'POINT', 0, 'COMMA') + ' đ'}">
                         </div>
                         <div class="text-muted" style="font-size:0.75rem"
                              th:text="${stats.totalCompletedOrders + ' đơn hoàn thành'}">
@@ -142,7 +142,7 @@
                                 <div class="text-muted" style="font-size:0.75rem" th:text="'@' + ${o.username}"></div>
                             </td>
                             <td class="fw-medium text-success small"
-                                th:text="${#numbers.formatDecimal(o.totalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                th:text="${#numbers.formatDecimal(o.totalPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">
                             </td>
                             <td>
                                 <span class="badge"
@@ -205,7 +205,7 @@
             data: {
                 labels: monthLabels,
                 datasets: [{
-                    label: 'Doanh thu (₫)',
+                    label: 'Doanh thu (đ)',
                     data: monthRevenues,
                     backgroundColor: 'rgba(13,110,253,0.75)',
                     borderColor: 'rgba(13,110,253,1)',
@@ -219,7 +219,7 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { callback: v => v.toLocaleString('vi-VN') + ' ₫' }
+                        ticks: { callback: v => v.toLocaleString('vi-VN') + ' đ' }
                     }
                 }
             }

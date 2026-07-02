@@ -45,7 +45,7 @@
             </div>
 
             <h1 class="fw-bold mb-3" th:text="${product.name}">Tên Sản Phẩm</h1>
-            <h2 class="text-primary fw-bold mb-4" th:text="${'$' + product.price}">$0.00</h2>
+            <h2 class="text-primary fw-bold mb-4" th:text="${#numbers.formatDecimal(product.price, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</h2>
 
             <p class="text-muted lh-lg mb-4" th:text="${product.description}">Mô tả sản phẩm sẽ nằm ở đây...</p>
 

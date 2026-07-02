@@ -76,10 +76,10 @@
                             </td>
                             <td class="text-center fw-bold" th:text="${item.quantity}"></td>
                             <td class="text-end text-muted small"
-                                th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">
                             </td>
                             <td class="text-end px-3 fw-medium text-success"
-                                th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                th:text="${#numbers.formatDecimal(item.subtotal, 1, 'POINT', 0, 'COMMA') + ' đ'}">
                             </td>
                         </tr>
                         </tbody>
@@ -87,7 +87,7 @@
                         <tr>
                             <td colspan="4" class="text-end fw-bold px-3 py-2">Tổng cộng:</td>
                             <td class="text-end px-3 fw-bold text-success fs-6"
-                                th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                th:text="${#numbers.formatDecimal(order.totalPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">
                             </td>
                         </tr>
                         </tfoot>
