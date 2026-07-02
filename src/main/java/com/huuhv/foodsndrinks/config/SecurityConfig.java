@@ -11,6 +11,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,7 +41,7 @@ public class SecurityConfig {
     public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/actuator/**")
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Basic liveness/readiness probe — no credentials needed
@@ -60,7 +61,7 @@ public class SecurityConfig {
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/**", "/api-docs/**")
-                .csrf(csrf -> csrf.disable())   // stateless → CSRF not needed
+                .csrf(AbstractHttpConfigurer::disable)   // stateless → CSRF not needed
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Swagger UI & OpenAPI spec (tighten or remove in prod via springdoc.swagger-ui.enabled=false)
@@ -122,12 +123,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Static assets
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico").permitAll()
+                        // Rating submission requires login — must be matched before the public /products/** rule below
+                        .requestMatchers("/products/*/rate").hasAnyRole("USER", "ADMIN")
                         // Public pages
-                        .requestMatchers("/", "/menu", "/login", "/register", "/error").permitAll()
+                        .requestMatchers("/", "/menu", "/products", "/products/**", "/categories/**", "/contact", "/login", "/register", "/error").permitAll()
                         // Admin dashboard — ROLE_ADMIN only
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers("/profile", "/cart/**", "/orders/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/profile", "/cart/**", "/orders/**", "/suggest").hasAnyRole("USER", "ADMIN")
                         // Anything else requires the user to be logged in
                         .anyRequest().authenticated()
                 )

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -262,6 +263,32 @@ public class ProductService {
 
     private static boolean blank(String s) {
         return s == null || s.isBlank();
+    }
+
+    // Filter products for user
+    @Transactional(readOnly = true)
+    public Page<Product> filterProductsForUser(ProductType type, Long categoryId, String keyword, Pageable pageable) {
+        String keywordParam = blank(keyword) ? null : keyword.trim();
+        return productRepository.filterProducts(type, categoryId, keywordParam, pageable);
+    }
+
+    /** Batch-load primary image URLs for a page of products — avoids N+1 when rendering the list. */
+    @Transactional(readOnly = true)
+    public Map<Long, String> getPrimaryImageUrls(List<Long> productIds) {
+        if (productIds.isEmpty()) return Map.of();
+        return productImageRepository.findPrimaryUrlsByProductIds(productIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (String) row[1],
+                        (a, b) -> a
+                ));
+    }
+
+    // Get product by slug for user
+    public Product getProductBySlug(String slug) {
+        return productRepository.findBySlugAndIsAvailableTrue(slug)
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh!"));
     }
 }
 

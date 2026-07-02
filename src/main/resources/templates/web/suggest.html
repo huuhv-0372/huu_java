@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/base}">
+<head>
+    <title>Góp Ý</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <h1 class="fw-bold mb-4">Góp Ý Của Bạn</h1>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Gửi Góp Ý Mới</h5>
+        <form th:action="@{/suggest}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="mb-3">
+                <textarea name="content" class="form-control" rows="4" required maxlength="2000"
+                          placeholder="Chia sẻ trải nghiệm, món ăn bạn muốn thấy, hoặc bất kỳ góp ý nào cho F&amp;B Store..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-regular fa-paper-plane me-1"></i> Gửi Góp Ý
+            </button>
+        </form>
+    </div>
+
+    <h5 class="fw-bold mb-3">Lịch Sử Góp Ý</h5>
+
+    <div th:if="${suggestionPage.empty}" class="text-center py-5">
+        <i class="fa-regular fa-lightbulb fs-1 text-muted mb-3"></i>
+        <h5 class="text-muted">Bạn chưa gửi góp ý nào.</h5>
+    </div>
+
+    <div th:if="${!suggestionPage.empty}" class="d-flex flex-column gap-3">
+        <div class="card shadow-sm border-0 p-3" th:each="suggestion : ${suggestionPage.content}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="text-muted small" th:text="${#temporals.format(suggestion.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+                <span class="badge" th:classappend="${suggestion.status.badgeClass}" th:text="${suggestion.status.label}">Trạng thái</span>
+            </div>
+            <p class="mb-2" th:text="${suggestion.content}">Nội dung góp ý</p>
+            <div th:if="${suggestion.adminNote != null and !suggestion.adminNote.isBlank()}" class="bg-light rounded p-2 mt-1">
+                <span class="text-muted small fw-medium d-block mb-1"><i class="fa-solid fa-reply me-1"></i>Phản hồi từ cửa hàng</span>
+                <span th:text="${suggestion.adminNote}">—</span>
+            </div>
+        </div>
+    </div>
+
+    <nav class="mt-4" th:if="${suggestionPage.totalPages > 1}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${suggestionPage.first ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/suggest(page=${suggestionPage.number - 1})}">Trước</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, suggestionPage.totalPages - 1)}"
+                th:classappend="${suggestionPage.number == i ? 'active' : ''}">
+                <a class="page-link" th:href="@{/suggest(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${suggestionPage.last ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/suggest(page=${suggestionPage.number + 1})}">Sau</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>

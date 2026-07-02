@@ -32,5 +32,17 @@ public interface SuggestionRepository extends JpaRepository<Suggestion, Long> {
     Page<Suggestion> search(@Param("status")  SuggestionStatus status,
                             @Param("keyword") String keyword,
                             Pageable pageable);
+
+    /** A user's own suggestion history — customer-facing "/suggest" page. */
+    @Query(value = """
+            SELECT s FROM Suggestion s
+            WHERE s.user.id = :userId
+            ORDER BY s.createdAt DESC
+            """,
+            countQuery = """
+            SELECT COUNT(s) FROM Suggestion s
+            WHERE s.user.id = :userId
+            """)
+    Page<Suggestion> findByUserId(@Param("userId") Long userId, Pageable pageable);
 }
 

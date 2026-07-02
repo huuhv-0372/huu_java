@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/base}">
+<head>
+    <title>Trang Cá Nhân</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <h1 class="fw-bold mb-4">Trang Cá Nhân</h1>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 p-4 text-center">
+                <img th:if="${user.avatarUrl != null}" th:src="${user.avatarUrl}"
+                     class="rounded-circle mx-auto mb-3" style="width: 96px; height: 96px; object-fit: cover;">
+                <span th:unless="${user.avatarUrl != null}"
+                      class="d-inline-flex align-items-center justify-content-center rounded-circle bg-secondary text-white fw-bold mx-auto mb-3"
+                      style="width: 96px; height: 96px; font-size: 2rem;"
+                      th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}">A</span>
+                <h5 class="fw-bold mb-0" th:text="${user.fullName}">Họ tên</h5>
+                <p class="text-muted mb-3" th:text="'@' + ${user.username}">@username</p>
+
+                <ul class="list-group list-group-flush text-start">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span class="text-muted">Email</span>
+                        <span class="fw-medium" th:text="${user.email}">email@example.com</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span class="text-muted">Điện thoại</span>
+                        <span class="fw-medium" th:text="${user.phone != null ? user.phone : '—'}">—</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span class="text-muted">Ngày tham gia</span>
+                        <span class="fw-medium" th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">01/01/2026</span>
+                    </li>
+                </ul>
+
+                <a href="/profile/edit" class="btn btn-outline-primary w-100 mt-3">
+                    <i class="fa-solid fa-pen me-1"></i> Chỉnh Sửa Thông Tin
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <a href="/cart" class="card shadow-sm border-0 p-4 text-center text-decoration-none h-100">
+                        <i class="fa-solid fa-cart-shopping fs-2 text-primary mb-2"></i>
+                        <h4 class="fw-bold mb-0" th:text="${cartItemCount}">0</h4>
+                        <span class="text-muted">Sản phẩm trong giỏ</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="/orders" class="card shadow-sm border-0 p-4 text-center text-decoration-none h-100">
+                        <i class="fa-solid fa-receipt fs-2 text-primary mb-2"></i>
+                        <h4 class="fw-bold mb-0" th:text="${recentOrders.totalElements}">0</h4>
+                        <span class="text-muted">Tổng số đơn hàng</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Đơn hàng gần đây</h6>
+                    <a href="/orders" class="small">Xem tất cả</a>
+                </div>
+
+                <div th:if="${recentOrders.empty}" class="card-body text-center text-muted py-4">
+                    Bạn chưa có đơn hàng nào.
+                </div>
+
+                <div th:if="${!recentOrders.empty}" class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <tbody>
+                        <tr th:each="order : ${recentOrders.content}">
+                            <td class="fw-bold" th:text="'#' + ${order.id}">#1</td>
+                            <td th:text="${#temporals.format(order.orderedAt != null ? order.orderedAt : order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                            <td class="text-center">
+                                <span class="badge" th:classappend="${order.status.badgeClass}" th:text="${order.status.label}">Trạng thái</span>
+                            </td>
+                            <td class="text-end fw-bold" th:text="${#numbers.formatDecimal(order.totalPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</td>
+                            <td class="text-end">
+                                <a th:href="@{/orders/{id}(id=${order.id})}" class="btn btn-outline-secondary btn-sm">Chi tiết</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -79,5 +79,14 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @Builder.Default
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    public String getPrimaryImageUrl() {
+        if (images == null || images.isEmpty()) return "/uploads/products/default-food.png";
+        return images.stream()
+                .filter(ProductImage::getIsPrimary)
+                .map(ProductImage::getImageUrl)
+                .findFirst()
+                .orElse(images.getFirst().getImageUrl());
+    }
 }
 
