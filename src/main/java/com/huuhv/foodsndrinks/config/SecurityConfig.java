@@ -1,6 +1,8 @@
 package com.huuhv.foodsndrinks.config;
 
 import com.huuhv.foodsndrinks.enums.Role;
+import com.huuhv.foodsndrinks.security.CustomOAuth2UserService;
+import com.huuhv.foodsndrinks.security.CustomOidcUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -30,6 +37,9 @@ public class SecurityConfig {
 
     @Value("${app.security.remember-me-key}")
     private String rememberMeKey;
+
+    private final CustomOidcUserService  customOidcUserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     // -------------------------------------------------------
     // Chain 1: Actuator endpoints — ROLE_ADMIN only
@@ -116,9 +126,20 @@ public class SecurityConfig {
     // -------------------------------------------------------
     // Chain 3: Web / Thymeleaf MVC — session + form login
     // -------------------------------------------------------
+    /** Forces PKCE for every OAuth2 login registration — Twitter/X requires it, and it's a strict
+     *  security improvement for Google/Facebook too even though they don't mandate it. */
+    @Bean
+    public OAuth2AuthorizationRequestResolver pkceAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
+        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
+        resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
+        return resolver;
+    }
+
     @Bean
     @Order(3)
-    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http,
+                                                       OAuth2AuthorizationRequestResolver pkceAuthorizationRequestResolver) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Static assets
@@ -127,6 +148,8 @@ public class SecurityConfig {
                         .requestMatchers("/products/*/rate").hasAnyRole("USER", "ADMIN")
                         // Public pages
                         .requestMatchers("/", "/menu", "/products", "/products/**", "/categories/**", "/contact", "/login", "/register", "/error").permitAll()
+                        // OAuth2 login redirect/callback endpoints — hit before the user is authenticated
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // Admin dashboard — ROLE_ADMIN only
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
 
@@ -144,6 +167,17 @@ public class SecurityConfig {
                         .successHandler(customAuthenticationSuccessHandler())
 
                         .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .successHandler(customAuthenticationSuccessHandler())
+                        .failureUrl("/login?error=true")
+                        .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(pkceAuthorizationRequestResolver))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .oidcUserService(customOidcUserService)
+                                .userService(customOAuth2UserService)
+                        )
                         .permitAll()
                 )
                 .logout(logout -> logout
