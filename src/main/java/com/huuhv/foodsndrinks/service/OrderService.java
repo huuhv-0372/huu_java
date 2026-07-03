@@ -6,6 +6,7 @@ import com.huuhv.foodsndrinks.entity.OrderDetail;
 import com.huuhv.foodsndrinks.entity.Product;
 import com.huuhv.foodsndrinks.entity.User;
 import com.huuhv.foodsndrinks.enums.OrderStatus;
+import com.huuhv.foodsndrinks.exception.ResourceNotFoundException;
 import com.huuhv.foodsndrinks.repository.OrderDetailRepository;
 import com.huuhv.foodsndrinks.repository.OrderRepository;
 import com.huuhv.foodsndrinks.repository.ProductImageRepository;
@@ -51,7 +52,7 @@ public class OrderService {
     public OrderResDto getOrderDetail(Long id) {
         // 1 query: order + user + orderDetails + products (FETCH JOIN, no lazy-load loops)
         Order order = orderRepository.findByIdWithDetailsAndProducts(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng #" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng #" + id));
         return buildOrderResDto(order, order.getOrderDetails());
     }
 
@@ -75,7 +76,7 @@ public class OrderService {
     public void addToCart(User user, Long productId, int quantity) {
         int qty = Math.max(quantity, 1);
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại!"));
         if (!Boolean.TRUE.equals(product.getIsAvailable())) {
             throw new IllegalArgumentException("Sản phẩm hiện không còn kinh doanh!");
         }
@@ -160,14 +161,14 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderResDto getOrderDetailForUser(Long orderId, Long userId) {
         Order order = orderRepository.findByIdAndUserIdWithDetailsAndProducts(orderId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng #" + orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng #" + orderId));
         return buildOrderResDto(order, order.getOrderDetails());
     }
 
     @Transactional
     public void updateStatus(Long id, OrderStatus newStatus) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng #" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng #" + id));
 
         OrderStatus current = order.getStatus();
         if (current == newStatus) return;
@@ -223,7 +224,7 @@ public class OrderService {
 
     private OrderDetail requireOwnedCartItem(User user, Long orderDetailId) {
         OrderDetail detail = orderDetailRepository.findById(orderDetailId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm trong giỏ không tồn tại!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm trong giỏ không tồn tại!"));
 
         Order order = detail.getOrder();
         if (order.getUser() == null || !order.getUser().getId().equals(user.getId())

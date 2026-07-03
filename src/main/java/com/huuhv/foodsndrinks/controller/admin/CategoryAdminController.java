@@ -2,6 +2,7 @@ package com.huuhv.foodsndrinks.controller.admin;
 
 import com.huuhv.foodsndrinks.dto.request.CategoryReqDto;
 import com.huuhv.foodsndrinks.dto.response.CategoryResDto;
+import com.huuhv.foodsndrinks.exception.DuplicateResourceException;
 import com.huuhv.foodsndrinks.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,7 @@ public class CategoryAdminController {
         try {
             categoryService.addCategory(categoryReqDto);
             ra.addFlashAttribute("successMessage", "Thêm danh mục thành công!");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | DuplicateResourceException e) {
             model.addAttribute("pageTitle", "Thêm Danh Mục");
             model.addAttribute("errorMessage", e.getMessage());
             return CATEGORY_FORM_VIEW;
@@ -100,7 +101,7 @@ public class CategoryAdminController {
         try {
             categoryService.updateCategory(categoryReqDto, id);
             ra.addFlashAttribute("successMessage", "Cập nhật danh mục thành công!");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | DuplicateResourceException e) {
             model.addAttribute("pageTitle", "Cập Nhật Danh Mục");
             model.addAttribute("errorMessage", e.getMessage());
             return CATEGORY_FORM_VIEW;

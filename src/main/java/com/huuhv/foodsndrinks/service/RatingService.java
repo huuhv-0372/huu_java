@@ -4,6 +4,7 @@ import com.huuhv.foodsndrinks.dto.response.RatingResDto;
 import com.huuhv.foodsndrinks.entity.Product;
 import com.huuhv.foodsndrinks.entity.Rating;
 import com.huuhv.foodsndrinks.entity.User;
+import com.huuhv.foodsndrinks.exception.ResourceNotFoundException;
 import com.huuhv.foodsndrinks.repository.ProductRepository;
 import com.huuhv.foodsndrinks.repository.RatingRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class RatingService {
             throw new IllegalArgumentException("Vui lòng chọn số sao từ 1 đến 5!");
         }
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại!"));
 
         Rating rating = ratingRepository.findByUserIdAndProductId(user.getId(), productId)
                 .orElseGet(() -> Rating.builder().user(user).product(product).build());
