@@ -8,6 +8,7 @@ import com.huuhv.foodsndrinks.entity.User;
 import com.huuhv.foodsndrinks.enums.AuthProvider;
 import com.huuhv.foodsndrinks.enums.Role;
 import com.huuhv.foodsndrinks.repository.UserRepository;
+import com.huuhv.foodsndrinks.utils.SlugUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,60 @@ public class UserService {
         user.setIsActive(true);
         userRepository.save(user);
         log.info("User registered: {}", dto.getUsername());
+    }
+
+    // -------------------------------------------------------
+    // OAuth2 login (Google/Facebook/Twitter) — find-or-create the local account
+    // -------------------------------------------------------
+
+    /**
+     * Resolves the local {@link User} behind an OAuth2 identity, creating one on first login.
+     * Match order: (provider, providerId) first, then by email (lets a Google/Facebook login
+     * attach to an existing account that shares the same — provider-verified — email).
+     *
+     * @param email    provider-supplied email; null when the provider doesn't expose one (e.g. Twitter)
+     * @param fullName provider-supplied display name; falls back to a generic label if blank
+     * @param avatarUrl provider-supplied profile picture URL, or null
+     */
+    @Transactional
+    public User provisionOAuthUser(AuthProvider provider, String providerId, String email, String fullName, String avatarUrl) {
+        User existing = userRepository.findByAuthProviderAndProviderId(provider, providerId).orElse(null);
+        if (existing != null) return existing;
+
+        if (!blank(email)) {
+            User byEmail = userRepository.findByEmail(email).orElse(null);
+            if (byEmail != null) return byEmail;
+        }
+
+        User user = new User();
+        user.setUsername(generateUniqueUsername(fullName, provider, providerId));
+        user.setEmail(!blank(email) ? email : placeholderEmail(provider, providerId));
+        user.setFullName(!blank(fullName) ? fullName : "Người dùng " + provider.name());
+        user.setAvatarUrl(avatarUrl);
+        user.setRole(Role.ROLE_USER);
+        user.setAuthProvider(provider);
+        user.setProviderId(providerId);
+        user.setIsActive(true);
+        userRepository.save(user);
+        log.info("Provisioned new {} user: {}", provider, user.getUsername());
+        return user;
+    }
+
+    private String generateUniqueUsername(String fullName, AuthProvider provider, String providerId) {
+        String base = SlugUtils.toSlug(fullName);
+        if (blank(base)) base = provider.name().toLowerCase(Locale.ROOT) + "-" + providerId;
+
+        String candidate = base;
+        int i = 1;
+        while (userRepository.existsByUsername(candidate)) {
+            candidate = base + "-" + (++i);
+        }
+        return candidate;
+    }
+
+    /** users.email is NOT NULL UNIQUE — synthesize a unique placeholder for providers (e.g. Twitter) that give no email. */
+    private String placeholderEmail(AuthProvider provider, String providerId) {
+        return provider.name().toLowerCase(Locale.ROOT) + "-" + providerId + "@no-email.fnbstore.local";
     }
 
     // -------------------------------------------------------
