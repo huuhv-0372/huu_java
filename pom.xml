@@ -133,10 +133,11 @@
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- springdoc 3.x là dòng tương thích Spring Boot 4 / Framework 7 (2.x chỉ cho Boot 3) -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.5.0</version>
+            <version>3.0.3</version>
         </dependency>
         <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
@@ -145,6 +146,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Boot 4 tách MockMvc test support (@AutoConfigureMockMvc, @WebMvcTest) ra module riêng -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
