@@ -2,6 +2,7 @@ package com.huuhv.foodsndrinks.controller.admin;
 
 import com.huuhv.foodsndrinks.dto.request.UserEditReqDto;
 import com.huuhv.foodsndrinks.dto.response.UserResDto;
+import com.huuhv.foodsndrinks.exception.DuplicateResourceException;
 import com.huuhv.foodsndrinks.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +73,7 @@ public class UserAdminController {
         try {
             userService.updateUser(id, dto);
             ra.addFlashAttribute("successMessage", "Cập nhật tài khoản thành công!");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | DuplicateResourceException e) {
             try { model.addAttribute("userDetail", userService.getUserDetail(id)); } catch (Exception ignored) {}
             model.addAttribute("pageTitle", "Chỉnh sửa tài khoản");
             model.addAttribute("errorMessage", e.getMessage());

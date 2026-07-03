@@ -7,6 +7,8 @@ import com.huuhv.foodsndrinks.dto.response.UserResDto;
 import com.huuhv.foodsndrinks.entity.User;
 import com.huuhv.foodsndrinks.enums.AuthProvider;
 import com.huuhv.foodsndrinks.enums.Role;
+import com.huuhv.foodsndrinks.exception.DuplicateResourceException;
+import com.huuhv.foodsndrinks.exception.ResourceNotFoundException;
 import com.huuhv.foodsndrinks.repository.UserRepository;
 import com.huuhv.foodsndrinks.utils.SlugUtils;
 import jakarta.transaction.Transactional;
@@ -116,7 +118,7 @@ public class UserService {
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public User getCurrentUser(String usernameOrEmail) {
         return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng!"));
     }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
@@ -134,10 +136,10 @@ public class UserService {
         User user = findById(id);
 
         if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
-            throw new IllegalArgumentException("Email đã được sử dụng bởi tài khoản khác!");
+            throw new DuplicateResourceException("Email đã được sử dụng bởi tài khoản khác!");
         }
         if (userRepository.existsByPhoneAndIdNot(dto.getPhone(), id)) {
-            throw new IllegalArgumentException("Số điện thoại đã được sử dụng bởi tài khoản khác!");
+            throw new DuplicateResourceException("Số điện thoại đã được sử dụng bởi tài khoản khác!");
         }
 
         if (!blank(dto.getNewPassword())) {
@@ -206,10 +208,10 @@ public class UserService {
         User user = findById(id);
 
         if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
-            throw new IllegalArgumentException("Email đã được sử dụng bởi tài khoản khác!");
+            throw new DuplicateResourceException("Email đã được sử dụng bởi tài khoản khác!");
         }
         if (userRepository.existsByPhoneAndIdNot(dto.getPhone(), id)) {
-            throw new IllegalArgumentException("Số điện thoại đã được sử dụng bởi tài khoản khác!");
+            throw new DuplicateResourceException("Số điện thoại đã được sử dụng bởi tài khoản khác!");
         }
 
         user.setFullName(dto.getFullName());
@@ -243,7 +245,7 @@ public class UserService {
 
     private User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user #" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user #" + id));
     }
 
     private static Role parseRole(String value) {

@@ -4,9 +4,12 @@ import com.huuhv.foodsndrinks.dto.request.CategoryReqDto;
 import com.huuhv.foodsndrinks.dto.response.CategoryResDto;
 import com.huuhv.foodsndrinks.entity.Category;
 import com.huuhv.foodsndrinks.enums.CategoryType;
+import com.huuhv.foodsndrinks.exception.DuplicateResourceException;
+import com.huuhv.foodsndrinks.exception.ResourceNotFoundException;
 import com.huuhv.foodsndrinks.repository.CategoryRepository;
 import com.huuhv.foodsndrinks.utils.SlugUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
@@ -47,13 +51,13 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public Category getCategoryBySlug(String slug) {
         return categoryRepository.findBySlug(slug)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục!"));
     }
 
     @Transactional(readOnly = true)
     public CategoryReqDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục!"));
 
         CategoryReqDto dto = new CategoryReqDto();
         dto.setId(category.getId());
@@ -69,7 +73,8 @@ public class CategoryService {
         String normalizedName = normalizeName(categoryReqDto.getName());
 
         if (categoryRepository.existsByName(normalizedName)) {
-            throw new IllegalArgumentException("Tên danh mục đã tồn tại!");
+            log.error("Tên danh mục đã tồn tại: {}", normalizedName);
+            throw new DuplicateResourceException("Tên danh mục đã tồn tại!");
         }
 
         Category category = new Category();
@@ -84,12 +89,12 @@ public class CategoryService {
     @Transactional
     public void updateCategory(CategoryReqDto updateCategoryReqDto, Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục!"));
 
         String normalizedName = normalizeName(updateCategoryReqDto.getName());
 
         if (categoryRepository.existsByNameAndIdNot(normalizedName, categoryId)) {
-            throw new IllegalArgumentException("Tên danh mục đã tồn tại!");
+            throw new DuplicateResourceException("Tên danh mục đã tồn tại!");
         }
 
         category.setName(normalizedName);
@@ -105,7 +110,7 @@ public class CategoryService {
         try {
             categoryRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("Danh mục không tồn tại!");
+            throw new ResourceNotFoundException("Danh mục không tồn tại!");
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Không thể xóa danh mục này vì đang được sử dụng.");
         }
