@@ -3,6 +3,29 @@ spring:
     name: foodsndrinks
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev} # Change to 'prod' when deploying to a real server
+  mail:
+    host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 server:
   port: 8080 # Default port
+
+app:
+  notification:
+    admin-email: ${ADMIN_NOTIFY_EMAIL:admin@example.com}
+    slack:
+      webhook-url: ${SLACK_WEBHOOK_URL:}
+      enabled: ${SLACK_NOTIFY_ENABLED:true}
+    mail:
+      enabled: ${MAIL_NOTIFY_ENABLED:true}
+    statistics:
+      cron: ${ORDER_STATS_CRON:0 0 23 L * *} # 23h ngày cuối tháng
+      zone: Asia/Ho_Chi_Minh
