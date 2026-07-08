@@ -3,7 +3,6 @@ package com.huuhv.foodsndrinks.controller.admin;
 import com.huuhv.foodsndrinks.dto.request.ProductReqDto;
 import com.huuhv.foodsndrinks.dto.response.ProductResDto;
 import com.huuhv.foodsndrinks.entity.Category;
-import com.huuhv.foodsndrinks.exception.DuplicateResourceException;
 import com.huuhv.foodsndrinks.service.CategoryService;
 import com.huuhv.foodsndrinks.service.ProductService;
 import jakarta.validation.Valid;
@@ -79,7 +78,7 @@ public class ProductAdminController {
         try {
             productService.createProduct(dto, newImages, 0);
             ra.addFlashAttribute("successMessage", "Thêm sản phẩm thành công!");
-        } catch (IllegalArgumentException | DuplicateResourceException e) {
+        } catch (IllegalArgumentException e) {
             model.addAttribute("pageTitle", "Thêm Sản Phẩm");
             model.addAttribute("errorMessage", e.getMessage());
             return PRODUCT_FORM_VIEW;
@@ -120,7 +119,7 @@ public class ProductAdminController {
         try {
             productService.updateProduct(id, dto, newImages, deleteImageIds, primaryImageId);
             ra.addFlashAttribute("successMessage", "Cập nhật sản phẩm thành công!");
-        } catch (IllegalArgumentException | DuplicateResourceException e) {
+        } catch (IllegalArgumentException e) {
             try { model.addAttribute("productDetail", productService.getProductDetail(id)); } catch (Exception ignored) {}
             model.addAttribute("pageTitle", "Cập Nhật Sản Phẩm");
             model.addAttribute("errorMessage", e.getMessage());
