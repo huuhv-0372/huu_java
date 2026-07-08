@@ -114,7 +114,7 @@
                         <small class="text-muted" th:text="'@' + ${o.username}"></small>
                     </td>
                     <td class="fw-medium text-success">
-                        <span th:text="${#numbers.formatDecimal(o.totalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></span>
+                        <span th:text="${#numbers.formatDecimal(o.totalPrice, 1, 'POINT', 0, 'COMMA') + ' đ'}"></span>
                     </td>
                     <td>
                         <span class="badge"

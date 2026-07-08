@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
@@ -16,6 +18,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByNameAndIdNot(String name, Long id);
     boolean existsBySlug(String slug);
     boolean existsBySlugAndIdNot(String slug, Long id);
+    Optional<Category> findBySlug(String slug);
 
     @Query("""
             SELECT c FROM Category c
