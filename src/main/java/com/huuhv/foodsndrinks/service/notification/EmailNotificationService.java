@@ -30,10 +30,13 @@ public class EmailNotificationService {
     @Value("${app.notification.mail.enabled:true}")
     private boolean enabled;
 
+    @Value("${app.notification.mail.from}")
+    private String fromEmail;
+
     @Async("taskExecutor")
     public void sendNewOrderEmail(OrderPlacedEvent event) {
         String subject = "[F&B Store] Đơn hàng mới #" + event.orderId();
-        send(subject, OrderMessageFormatter.buildOrderSummary(event), event.orderId());
+        send(subject, OrderMessageFormatter.buildOrderSummary(event), event.orderId(), event.customerEmail());
     }
 
     public void sendMonthlyStatistics(int year, int month, BigDecimal revenue, long completedCount,
@@ -46,10 +49,10 @@ public class EmailNotificationService {
         body.append("Chi tiết theo trạng thái:\n");
         statusCounts.forEach((status, count) ->
                 body.append("  - ").append(status.getLabel()).append(": ").append(count).append('\n'));
-        send(subject, body.toString(), null);
+        send(subject, body.toString(), null, null);
     }
 
-    private void send(String subject, String body, Long orderId) {
+    private void send(String subject, String body, Long orderId, String replyTo) {
         if (!enabled || adminEmail == null || adminEmail.isBlank()) {
             log.warn("Admin email notification skipped (disabled or admin-email not configured)");
             return;
@@ -57,6 +60,12 @@ public class EmailNotificationService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromEmail);
+            // Reply-To carries the ordering customer's address — SMTP providers reject a forged
+            // From header, so this is how the admin replies straight to the customer
+            if (replyTo != null && !replyTo.isBlank()) {
+                helper.setReplyTo(replyTo);
+            }
             helper.setTo(adminEmail);
             helper.setSubject(subject);
             helper.setText(body, false);
