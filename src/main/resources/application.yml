@@ -6,8 +6,8 @@ spring:
   mail:
     host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:be50adf0f8a094}
-    password: ${MAIL_PASSWORD:fba584c9dc631c}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -23,8 +23,8 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:512528754291-re02acdrerinr47adao4mu1hjrclgbl0.apps.googleusercontent.com}
-            client-secret: ${GOOGLE_CLIENT_SECRET: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}
+            client-id: ${GOOGLE_CLIENT_ID:changeme-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:changeme-google-client-secret}
             scope: openid, profile, email
           facebook:
             client-id: ${FACEBOOK_CLIENT_ID:changeme-facebook-client-id}
@@ -64,11 +64,10 @@ app:
   notification:
     admin-email: ${ADMIN_NOTIFY_EMAIL:admin@example.com}
     slack:
-      webhook-url: ${SLACK_WEBHOOK_URL:https://hooks.slack.com/services/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}
+      webhook-url: ${SLACK_WEBHOOK_URL:}
       enabled: ${SLACK_NOTIFY_ENABLED:true}
     mail:
       enabled: ${MAIL_NOTIFY_ENABLED:true}
-      from: ${MAIL_FROM:no-reply@foodsndrinks.local}
     statistics:
       cron: ${ORDER_STATS_CRON:0 0 23 L * *} # 23h ngày cuối tháng
       zone: Asia/Ho_Chi_Minh
