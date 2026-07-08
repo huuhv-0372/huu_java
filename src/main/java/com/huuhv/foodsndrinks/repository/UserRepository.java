@@ -1,7 +1,6 @@
 package com.huuhv.foodsndrinks.repository;
 
 import com.huuhv.foodsndrinks.entity.User;
-import com.huuhv.foodsndrinks.enums.AuthProvider;
 import com.huuhv.foodsndrinks.enums.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhoneAndIdNot(String phone, Long id);
 
     Optional<User> findByUsernameOrEmail(String username, String email);
-    Optional<User> findByEmail(String email);
-    Optional<User> findByAuthProviderAndProviderId(AuthProvider authProvider, String providerId);
 
     long countByIsActiveTrue();
 

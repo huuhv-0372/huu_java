@@ -1,21 +1,13 @@
 package com.huuhv.foodsndrinks.config;
 
 import com.huuhv.foodsndrinks.enums.Role;
-import com.huuhv.foodsndrinks.security.CustomOAuth2UserService;
-import com.huuhv.foodsndrinks.security.CustomOidcUserService;
-import com.huuhv.foodsndrinks.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,16 +15,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 import java.util.Collection;
@@ -45,25 +30,6 @@ public class SecurityConfig {
 
     @Value("${app.security.remember-me-key}")
     private String rememberMeKey;
-
-    private final CustomOidcUserService  customOidcUserService;
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final JwtAuthenticationFilter jwtAuthFilter;
-
-    /** Expose AuthenticationManager so AuthService can authenticate username/password for the JWT login API. */
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    /** jwtAuthFilter is a @Component, so Boot would also auto-register it as a servlet filter for EVERY
-     *  request (web pages included). Disable that — it must only run inside the API security chain below. */
-    @Bean
-    public FilterRegistrationBean<JwtAuthenticationFilter> jwtAuthFilterRegistration(JwtAuthenticationFilter filter) {
-        FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
-        registration.setEnabled(false);
-        return registration;
-    }
 
     // -------------------------------------------------------
     // Chain 1: Actuator endpoints — ROLE_ADMIN only
@@ -102,15 +68,11 @@ public class SecurityConfig {
                         .requestMatchers("/api-docs/**", "/api/v1/api-docs/**").permitAll()
                         // Auth endpoints (login, register, refresh-token) — public
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/products/**").hasAnyRole("USER", "ADMIN")
                         // Every other API call must be authenticated
                         .anyRequest().authenticated()
-                )
-                // No entry point configured → Spring falls back to 403; a missing/invalid token must be 401
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 );
-         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        // TODO: plug in JwtAuthenticationFilter once JWT service is ready:
+        // http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -154,20 +116,9 @@ public class SecurityConfig {
     // -------------------------------------------------------
     // Chain 3: Web / Thymeleaf MVC — session + form login
     // -------------------------------------------------------
-    /** Forces PKCE for every OAuth2 login registration — Twitter/X requires it, and it's a strict
-     *  security improvement for Google/Facebook too even though they don't mandate it. */
-    @Bean
-    public OAuth2AuthorizationRequestResolver pkceAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
-        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
-                clientRegistrationRepository, OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI);
-        resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
-        return resolver;
-    }
-
     @Bean
     @Order(3)
-    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http,
-                                                       OAuth2AuthorizationRequestResolver pkceAuthorizationRequestResolver) throws Exception {
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Static assets
@@ -176,8 +127,6 @@ public class SecurityConfig {
                         .requestMatchers("/products/*/rate").hasAnyRole("USER", "ADMIN")
                         // Public pages
                         .requestMatchers("/", "/menu", "/products", "/products/**", "/categories/**", "/contact", "/login", "/register", "/error").permitAll()
-                        // OAuth2 login redirect/callback endpoints — hit before the user is authenticated
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // Admin dashboard — ROLE_ADMIN only
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
 
@@ -195,17 +144,6 @@ public class SecurityConfig {
                         .successHandler(customAuthenticationSuccessHandler())
 
                         .failureUrl("/login?error=true")
-                        .permitAll()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .successHandler(customAuthenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
-                        .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(pkceAuthorizationRequestResolver))
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .oidcUserService(customOidcUserService)
-                                .userService(customOAuth2UserService)
-                        )
                         .permitAll()
                 )
                 .logout(logout -> logout

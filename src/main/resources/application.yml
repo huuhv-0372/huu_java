@@ -15,48 +15,6 @@ spring:
           starttls:
             enable: true
 
-  # Social login (see login.html "Đăng nhập bằng..." buttons). Client id/secret come from each
-  # provider's developer console — set the real values via env vars before going live; the
-  # "changeme-*" defaults just let the app boot without them configured.
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:changeme-google-client-id}
-            client-secret: ${GOOGLE_CLIENT_SECRET:changeme-google-client-secret}
-            scope: openid, profile, email
-          facebook:
-            client-id: ${FACEBOOK_CLIENT_ID:changeme-facebook-client-id}
-            client-secret: ${FACEBOOK_CLIENT_SECRET:changeme-facebook-client-secret}
-            scope: public_profile, email
-          twitter:
-            client-id: ${TWITTER_CLIENT_ID:changeme-twitter-client-id}
-            client-secret: ${TWITTER_CLIENT_SECRET:changeme-twitter-client-secret}
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            client-authentication-method: client_secret_basic
-            scope: users.read, tweet.read
-        provider:
-          google:
-            # Google verifies email ownership, so use it as the account-matching / principal name key
-            user-name-attribute: email
-          facebook:
-            # Spring's Facebook default only requests id,name,email — add the profile picture too
-            user-info-uri: https://graph.facebook.com/me?fields=id,name,email,picture
-          twitter:
-            # Twitter/X isn't one of Spring's built-in providers (CommonOAuth2Provider) — fully manual.
-            # Its OAuth2 authorization server also mandates PKCE regardless of client type (see
-            # SecurityConfig#pkceAuthorizationRequestResolver).
-            authorization-uri: https://twitter.com/i/oauth2/authorize
-            token-uri: https://api.twitter.com/2/oauth2/token
-            # user.fields=profile_image_url so the response includes an avatar URL
-            user-info-uri: https://api.twitter.com/2/users/me?user.fields=profile_image_url
-            # The response nests every field under a top-level "data" object — see
-            # CustomOAuth2UserService, which unwraps it. "data" itself is just used to satisfy
-            # DefaultOAuth2UserService's "name attribute must exist" check.
-            user-name-attribute: data
-
 server:
   port: 8080 # Default port
 
