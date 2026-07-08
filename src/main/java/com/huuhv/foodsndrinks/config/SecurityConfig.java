@@ -121,7 +121,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Static assets
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico").permitAll()
                         // Public pages
                         .requestMatchers("/", "/menu", "/login", "/register", "/error").permitAll()
                         // Admin dashboard — ROLE_ADMIN only
@@ -157,7 +157,7 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex
                         // Redirect to a friendly 403 page instead of the default whitelabel
-                        .accessDeniedPage("/error/403")
+                        .accessDeniedPage("/error")
                 );
 
         return http.build();
