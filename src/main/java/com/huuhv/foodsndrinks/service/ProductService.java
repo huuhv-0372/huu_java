@@ -6,6 +6,8 @@ import com.huuhv.foodsndrinks.entity.Category;
 import com.huuhv.foodsndrinks.entity.Product;
 import com.huuhv.foodsndrinks.entity.ProductImage;
 import com.huuhv.foodsndrinks.enums.ProductType;
+import com.huuhv.foodsndrinks.exception.DuplicateResourceException;
+import com.huuhv.foodsndrinks.exception.ResourceNotFoundException;
 import com.huuhv.foodsndrinks.repository.CategoryRepository;
 import com.huuhv.foodsndrinks.repository.ProductImageRepository;
 import com.huuhv.foodsndrinks.repository.ProductRepository;
@@ -101,7 +103,7 @@ public class ProductService {
                               int primaryIndex) {
         String normalizedName = normalizeName(dto.getName());
         if (productRepository.existsByName(normalizedName)) {
-            throw new IllegalArgumentException("Tên sản phẩm đã tồn tại!");
+            throw new DuplicateResourceException("Tên sản phẩm đã tồn tại!");
         }
 
         Category category = findCategory(dto.getCategoryId());
@@ -129,7 +131,7 @@ public class ProductService {
         String normalizedName = normalizeName(dto.getName());
 
         if (productRepository.existsByNameAndIdNot(normalizedName, id)) {
-            throw new IllegalArgumentException("Tên sản phẩm đã tồn tại!");
+            throw new DuplicateResourceException("Tên sản phẩm đã tồn tại!");
         }
 
         // Delete marked images
@@ -215,13 +217,13 @@ public class ProductService {
 
     private Product findById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm!"));
     }
 
     private Category findCategory(Long categoryId) {
         if (categoryId == null) return null;
         return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy danh mục!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục!"));
     }
 
     private String normalizeName(String name) {
@@ -288,7 +290,7 @@ public class ProductService {
     // Get product by slug for user
     public Product getProductBySlug(String slug) {
         return productRepository.findBySlugAndIsAvailableTrue(slug)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh!"));
     }
 }
 

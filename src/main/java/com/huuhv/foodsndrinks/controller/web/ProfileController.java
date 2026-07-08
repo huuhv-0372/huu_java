@@ -2,6 +2,7 @@ package com.huuhv.foodsndrinks.controller.web;
 
 import com.huuhv.foodsndrinks.dto.request.ProfileUpdateReqDto;
 import com.huuhv.foodsndrinks.entity.User;
+import com.huuhv.foodsndrinks.exception.DuplicateResourceException;
 import com.huuhv.foodsndrinks.service.OrderService;
 import com.huuhv.foodsndrinks.service.UserService;
 import jakarta.validation.Valid;
@@ -59,7 +60,7 @@ public class ProfileController {
             userService.updateProfile(user.getId(), dto);
             ra.addFlashAttribute("successMessage", "Cập nhật thông tin thành công!");
             return "redirect:/profile";
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | DuplicateResourceException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return PROFILE_EDIT_VIEW;
         }

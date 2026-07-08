@@ -4,6 +4,7 @@ import com.huuhv.foodsndrinks.dto.response.CartPayloadResDto;
 import com.huuhv.foodsndrinks.dto.response.ErrorResponse;
 import com.huuhv.foodsndrinks.dto.response.OrderResDto;
 import com.huuhv.foodsndrinks.entity.User;
+import com.huuhv.foodsndrinks.exception.ResourceNotFoundException;
 import com.huuhv.foodsndrinks.service.OrderService;
 import com.huuhv.foodsndrinks.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class CartController {
         try {
             orderService.addToCart(user, productId, quantity);
             return ResponseEntity.ok(buildCartPayload(user.getId()));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ResourceNotFoundException e) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().message(e.getMessage()).build());
         }
     }
@@ -60,7 +61,7 @@ public class CartController {
         try {
             orderService.updateCartItemQuantity(user, detailId, quantity);
             return ResponseEntity.ok(buildCartPayload(user.getId()));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ResourceNotFoundException e) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().message(e.getMessage()).build());
         }
     }
@@ -73,7 +74,7 @@ public class CartController {
         try {
             orderService.removeCartItem(user, detailId);
             return ResponseEntity.ok(buildCartPayload(user.getId()));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ResourceNotFoundException e) {
             return ResponseEntity.badRequest().body(ErrorResponse.builder().message(e.getMessage()).build());
         }
     }
