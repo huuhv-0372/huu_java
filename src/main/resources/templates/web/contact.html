@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{web/layout/base}">
+<head>
+    <title>Liên Hệ</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Liên Hệ Với Chúng Tôi</h1>
+        <p class="text-muted">Có câu hỏi hoặc góp ý? Đừng ngần ngại liên hệ với F&amp;B Store.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div class="fs-1 text-primary mb-3"><i class="fa-solid fa-location-dot"></i></div>
+                <h5 class="fw-bold mb-2">Địa Chỉ</h5>
+                <p class="text-muted mb-0">123 Đường Yên Bình,<br>Phường Yên Nghĩa, TP. Hà Nội</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div class="fs-1 text-primary mb-3"><i class="fa-solid fa-phone"></i></div>
+                <h5 class="fw-bold mb-2">Điện Thoại</h5>
+                <p class="text-muted mb-0">
+                    <a class="text-decoration-none text-muted" href="tel:+84281234567">(028) 1234 567</a><br>
+                    Hotline: <a class="text-decoration-none text-muted" href="tel:+84901234567">0901 234 567</a>
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div class="fs-1 text-primary mb-3"><i class="fa-solid fa-envelope"></i></div>
+                <h5 class="fw-bold mb-2">Email</h5>
+                <p class="text-muted mb-0">
+                    <a class="text-decoration-none text-muted" href="mailto:contact@fnbstore.vn">contact@fnbstore.vn</a><br>
+                    <a class="text-decoration-none text-muted" href="mailto:support@fnbstore.vn">support@fnbstore.vn</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100 p-4">
+                <h5 class="fw-bold mb-3"><i class="fa-regular fa-clock text-primary me-2"></i>Giờ Mở Cửa</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Thứ Hai - Thứ Sáu</span>
+                        <span class="fw-medium">08:00 - 22:00</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Thứ Bảy - Chủ Nhật</span>
+                        <span class="fw-medium">08:00 - 23:00</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Ngày Lễ</span>
+                        <span class="fw-medium">09:00 - 21:00</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100 p-4">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-share-nodes text-primary me-2"></i>Kết Nối Với Chúng Tôi</h5>
+                <p class="text-muted">Theo dõi F&amp;B Store để cập nhật khuyến mãi và món mới sớm nhất.</p>
+                <div class="d-flex gap-2">
+                    <a href="#" class="btn btn-outline-primary rounded-circle" style="width: 42px; height: 42px;">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary rounded-circle" style="width: 42px; height: 42px;">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-primary rounded-circle" style="width: 42px; height: 42px;">
+                        <i class="fa-brands fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
