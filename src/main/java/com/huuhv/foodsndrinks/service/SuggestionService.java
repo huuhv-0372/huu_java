@@ -3,7 +3,9 @@ package com.huuhv.foodsndrinks.service;
 import com.huuhv.foodsndrinks.dto.request.SuggestionEditReqDto;
 import com.huuhv.foodsndrinks.dto.response.SuggestionResDto;
 import com.huuhv.foodsndrinks.entity.Suggestion;
+import com.huuhv.foodsndrinks.entity.User;
 import com.huuhv.foodsndrinks.enums.SuggestionStatus;
+import com.huuhv.foodsndrinks.exception.ResourceNotFoundException;
 import com.huuhv.foodsndrinks.repository.SuggestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -50,6 +52,28 @@ public class SuggestionService {
     }
 
     // -------------------------------------------------------
+    // Web: customer's own suggestions
+    // -------------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public Page<SuggestionResDto> getSuggestionsForUser(Long userId, int page, int size) {
+        return suggestionRepository.findByUserId(userId, PageRequest.of(Math.max(page, 0), size))
+                .map(SuggestionResDto::from);
+    }
+
+    @Transactional
+    public void createSuggestion(User user, String content) {
+        if (blank(content)) {
+            throw new IllegalArgumentException("Vui lòng nhập nội dung góp ý!");
+        }
+        Suggestion suggestion = Suggestion.builder()
+                .user(user)
+                .content(content.trim())
+                .build();
+        suggestionRepository.save(suggestion);
+    }
+
+    // -------------------------------------------------------
     // Write
     // -------------------------------------------------------
 
@@ -74,7 +98,7 @@ public class SuggestionService {
 
     private Suggestion findById(Long id) {
         return suggestionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy góp ý #" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy góp ý #" + id));
     }
 
     private static SuggestionStatus parseStatus(String value) {

@@ -4,12 +4,18 @@ import com.huuhv.foodsndrinks.entity.OrderDetail;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
+
+    /** Total item quantity in the user's cart — used for the navbar badge */
+    @Query("SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od " +
+            "WHERE od.order.user.id = :userId AND od.order.status = 'CART'")
+    int sumCartQuantityByUserId(@Param("userId") Long userId);
 
     /**
      * Top-selling products by total quantity sold (COMPLETED orders only).
