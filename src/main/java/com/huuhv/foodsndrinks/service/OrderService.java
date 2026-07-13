@@ -10,7 +10,9 @@ import com.huuhv.foodsndrinks.repository.OrderDetailRepository;
 import com.huuhv.foodsndrinks.repository.OrderRepository;
 import com.huuhv.foodsndrinks.repository.ProductImageRepository;
 import com.huuhv.foodsndrinks.repository.ProductRepository;
+import com.huuhv.foodsndrinks.service.notification.OrderPlacedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ public class OrderService {
     private final OrderDetailRepository  orderDetailRepository;
     private final ProductRepository      productRepository;
     private final ProductImageRepository productImageRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public Page<OrderResDto> searchOrders(String statusStr, String keyword,
@@ -140,6 +143,8 @@ public class OrderService {
         cart.setStatus(OrderStatus.PENDING);
         cart.setOrderedAt(LocalDateTime.now());
         orderRepository.save(cart);
+
+        eventPublisher.publishEvent(buildOrderPlacedEvent(cart, user));
     }
 
     // -------------------------------------------------------
@@ -194,6 +199,18 @@ public class OrderService {
                         ));
 
         return OrderResDto.forDetail(order, details, primaryUrls);
+    }
+
+    /** Flattens order + eagerly-loaded line items into an event snapshot (no lazy JPA access from the async listener). */
+    private OrderPlacedEvent buildOrderPlacedEvent(Order order, User user) {
+        List<OrderPlacedEvent.OrderLineItem> items = order.getOrderDetails().stream()
+                .map(od -> new OrderPlacedEvent.OrderLineItem(
+                        od.getProduct() != null ? od.getProduct().getName() : "N/A",
+                        od.getQuantity(), od.getUnitPrice(), od.getSubtotal()))
+                .toList();
+
+        return new OrderPlacedEvent(order.getId(), user.getFullName(), user.getEmail(), user.getPhone(),
+                order.getShippingAddress(), order.getNote(), order.getTotalPrice(), order.getOrderedAt(), items);
     }
 
     private Order createEmptyCart(User user) {
